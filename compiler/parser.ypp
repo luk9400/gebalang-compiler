@@ -1,0 +1,140 @@
+%{
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <memory>
+#include <fstream>
+#include <streambuf>
+
+#include "data.hpp"
+#include "code.hpp"
+
+int yylex();
+int yyerror(std::string);
+extern FILE *yyin;
+extern int yylineno;
+int error = 0;
+
+std::shared_ptr<Data> data = std::make_shared<Data>();
+std::shared_ptr<Code> code = std::make_shared<Code>(data);
+
+%}
+
+%union sem_rec {
+    std::string* pidentifier;
+    long long num;
+}
+
+%start program
+%token DECLARE TBEGIN END
+%token IF WHILE DO FOR
+%token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
+%token READ WRITE
+%token LE GE LEQ GEQ EQ NEQ
+%token ASSIGN
+%token ERROR
+%token <pidentifier> pidentifier
+%token <num> num
+
+%left PLUS MINUS
+%left TIMES DIV MOD
+
+%%
+
+program:        DECLARE 
+                    declarations
+                TBEGIN 
+                    commands 
+                END                                                 { code->end_code(); }
+              | TBEGIN 
+                    commands 
+                END                                                 { code->end_code(); }
+;              
+
+declarations:  declarations',' pidentifier                          { data->put_symbol(*$3); }
+              | declarations',' pidentifier'('num':'num')'
+              | pidentifier                                         { data->put_symbol(*$1); }
+              | pidentifier'('num':'num')'
+;              
+
+commands:      commands command
+              | command
+;              
+
+command:       identifier ASSIGN expression';'
+              | IF condition THEN commands ELSE commands ENDIF
+              | IF condition THEN commands ENDIF
+              | WHILE condition DO commands ENDWHILE
+              | DO commands WHILE condition ENDDO
+              | FOR pidentifier FROM value TO value DO commands ENDFOR
+              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
+              | READ identifier';'
+              | WRITE value';'                                      { code->write(*$2); }
+;              
+
+expression:    value                                                { code->constant(*$1); }
+              | value PLUS value
+              | value MINUS value
+              | value TIMES value
+              | value DIV value
+              | value MOD value
+;              
+
+condition:     value EQ value
+              | value NEQ value
+              | value LE value
+              | value GE value
+              | value LEQ value
+              | value GEQ value
+;
+
+value:         num
+              | identifier
+;
+
+identifier:    pidentifier
+              | pidentifier'('pidentifier')'
+              | pidentifier'('num')'
+;
+%%
+
+int yyerror(std::string str) {
+    std::cout << str << " at line " << yylineno << std::endl;
+    return 1;
+}
+
+void return_code(std::vector<std::string> code, std::string file) {
+    std::ofstream fout(file);
+
+    std::vector<std::string>::iterator it;
+
+    for (it = code.begin(); it != code.end(); it++) {
+        fout << *it << std::endl;
+    }
+
+    fout.close();
+}
+
+int main(int argc, char** argv) {
+    if (argc < 3) {
+        std::cerr << "Not enough arguments" << std::endl;
+        std::cout << "compiler [input_file] [output_file]" << std::endl;
+        return 1;
+    }
+
+    yyin = fopen(argv[1], "r");
+
+    if (yyin == nullptr) {
+        return 2;
+    }
+
+    std::cout << "### Starting compilation ###" << std::endl; 
+
+    yyparse();
+
+    data->print_symbols();
+
+    return_code(code->get_code(), argv[2]);
+
+    return 0;
+}

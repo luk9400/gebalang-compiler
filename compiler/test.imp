@@ -1,0 +1,3 @@
+BEGIN  
+    WRITE -12;
+END
