@@ -1,3 +1,6 @@
+DECLARE 
+    a
 BEGIN  
-    WRITE -12;
+    READ b;
+    WRITE a;
 END

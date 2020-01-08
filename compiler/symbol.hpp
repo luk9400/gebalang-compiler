@@ -5,7 +5,7 @@
 typedef struct symbol{
     std::string name;
     long long offset;
-    //long long value;
+    long long value;
     bool is_init;
 
     symbol(std::string name, long long offset) {

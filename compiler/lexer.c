@@ -991,7 +991,7 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 #line 58 "lexer.l"
-{ std::cout << yytext << std::endl; yylval.num = std::stoll(yytext); return num; }
+{ yylval.num = std::stoll(yytext); return num; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP

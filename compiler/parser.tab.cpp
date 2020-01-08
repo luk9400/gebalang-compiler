@@ -483,10 +483,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    44,    44,    49,    54,    55,    56,    57,    60,    61,
-      64,    65,    66,    67,    68,    69,    70,    71,    72,    75,
-      76,    77,    78,    79,    80,    83,    84,    85,    86,    87,
-      88,    91,    92,    95,    96,    97
+       0,    48,    48,    49,    52,    53,    54,    55,    58,    59,
+      62,    63,    64,    65,    66,    67,    68,    69,    70,    73,
+      74,    75,    76,    77,    78,    81,    82,    83,    84,    85,
+      86,    89,    90,    93,    94,    95
 };
 #endif
 
@@ -1344,25 +1344,67 @@ yyreduce:
     break;
 
   case 3:
-#line 51 "parser.ypp" /* yacc.c:1646  */
+#line 49 "parser.ypp" /* yacc.c:1646  */
     { code->end_code(); }
 #line 1350 "parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 54 "parser.ypp" /* yacc.c:1646  */
+#line 52 "parser.ypp" /* yacc.c:1646  */
     { data->put_symbol(*(yyvsp[0].pidentifier)); }
 #line 1356 "parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 56 "parser.ypp" /* yacc.c:1646  */
+#line 54 "parser.ypp" /* yacc.c:1646  */
     { data->put_symbol(*(yyvsp[0].pidentifier)); }
 #line 1362 "parser.tab.cpp" /* yacc.c:1646  */
     break;
 
+  case 10:
+#line 62 "parser.ypp" /* yacc.c:1646  */
+    { code->assign((yyvsp[-3].num), (yyvsp[-1].num)); }
+#line 1368 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
 
-#line 1366 "parser.tab.cpp" /* yacc.c:1646  */
+  case 17:
+#line 69 "parser.ypp" /* yacc.c:1646  */
+    { code->read((yyvsp[-1].num)); }
+#line 1374 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 70 "parser.ypp" /* yacc.c:1646  */
+    { code->write((yyvsp[-1].num)); }
+#line 1380 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 73 "parser.ypp" /* yacc.c:1646  */
+    { (yyval.num) = (yyvsp[0].num); }
+#line 1386 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 31:
+#line 89 "parser.ypp" /* yacc.c:1646  */
+    { (yyval.num) = code->get_num((yyvsp[0].num)); }
+#line 1392 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 90 "parser.ypp" /* yacc.c:1646  */
+    { (yyval.num) = (yyvsp[0].num); }
+#line 1398 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 33:
+#line 93 "parser.ypp" /* yacc.c:1646  */
+    { (yyval.num) = code->pidentifier(*(yyvsp[0].pidentifier)); }
+#line 1404 "parser.tab.cpp" /* yacc.c:1646  */
+    break;
+
+
+#line 1408 "parser.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1590,11 +1632,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 99 "parser.ypp" /* yacc.c:1906  */
+#line 97 "parser.ypp" /* yacc.c:1906  */
 
 
 int yyerror(std::string str) {
-    std::cout << str << " at line " << yylineno << std::endl;
+    std::cerr << str << " at line " << yylineno << std::endl;
     return 1;
 }
 
@@ -1625,11 +1667,14 @@ int main(int argc, char** argv) {
 
     std::cout << "### Starting compilation ###" << std::endl; 
 
-    yyparse();
+    try {
+        yyparse();
+        return_code(code->get_code(), argv[2]);
+    } catch (std::string e) {
+        yyerror(e);
+    }
 
     data->print_symbols();
-
-    return_code(code->get_code(), argv[2]);
 
     return 0;
 }

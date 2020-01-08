@@ -55,7 +55,7 @@ specialChars    [\;\(\)\:\,]
 "GEQ"           { return GEQ; }
 
 {pidentifier}   { yylval.pidentifier = new std::string(yytext); return pidentifier;}  
-{digits}        { std::cout << yytext << std::endl; yylval.num = std::stoll(yytext); return num; }
+{digits}        { yylval.num = std::stoll(yytext); return num; }
 {specialChars}  { return yytext[0]; }
 
 "["             BEGIN(comment);

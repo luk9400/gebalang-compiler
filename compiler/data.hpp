@@ -12,11 +12,13 @@ class Data {
     public:
         long long memory_offset;
 
+        Data();
+
         bool check_context(std::string name);
         void put_symbol(std::string name);
         symbol* get_symbol(std::string name);
+
+        void init_constant(std::string name, long long value);
         
         void print_symbols();
-        
-        Data();
 };

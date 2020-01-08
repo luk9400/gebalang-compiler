@@ -17,7 +17,14 @@ class Code {
         std::vector<std::string> get_code();
         void end_code();
 
-        void write();
+        void write(long long offset);
+        void read(long long offset);
 
-        void constant(long long value);
+        long long get_num(long long num);
+
+        void generate_constant(long long value, long long offset);
+
+        void assign(long long var_offset, long long value_offset);
+
+        long long pidentifier(std::string name);
 };
