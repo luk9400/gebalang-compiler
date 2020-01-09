@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 
+#include "symbol.hpp"
 #include "parser.tab.hpp"
 
 int yylex();

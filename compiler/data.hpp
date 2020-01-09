@@ -16,6 +16,8 @@ class Data {
 
         bool check_context(std::string name);
         void put_symbol(std::string name, bool is_const);
+        void put_array(std::string name, long long array_start, long long array_end);
+        void put_array_cell(std::string name, long long offset); 
         symbol* get_symbol(std::string name);
 
         void init_constant(std::string name, long long value);

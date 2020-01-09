@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "code.hpp"
 #include "data.hpp"
@@ -92,6 +93,27 @@ symbol* Code::pidentifier(std::string name) {
     }
 }
 
+symbol* Code::array_num_pidentifier(std::string name, long long num) {
+    symbol* sym = this->data->get_symbol(name);
+    if (sym != nullptr) {
+        if (sym->array_start <= num && sym->array_end >= num) {
+            long long offset = num - sym->array_start + sym->offset;
+
+            if (!this->data->check_context(name + std::to_string(num))) {
+                this->data->put_array_cell(name + std::to_string(num), offset);
+            }
+            this->data->put_array_cell(name + std::to_string(num), offset);
+            symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
+            
+            return ret_sym;
+        } else {
+            throw std::string(name + " - index out of boundry");
+        }
+    } else {
+        throw std::string(name + " - array does not exist");
+    }
+}
+
 // MISC
 
 void Code::generate_constant(long long value, long long offset) {
@@ -119,6 +141,9 @@ void Code::init_const(symbol* sym) {
 }
 
 void Code::check_init(symbol* sym) {
+    if (sym->is_array_cell) {
+        return;
+    }
     if (!sym->is_init) {
         if (sym->is_const) {
             this->init_const(sym);

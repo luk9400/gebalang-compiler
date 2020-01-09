@@ -1,8 +1,6 @@
 DECLARE
-    a, b
+    a(1:5)
 BEGIN
-    READ a;
-    READ b;
-    a ASSIGN a MINUS b;
-    WRITE a;
+    READ a(2);
+    WRITE a(2);
 END

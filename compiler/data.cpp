@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <cmath>
 
 #include "data.hpp"
 #include "symbol.hpp"
@@ -35,6 +36,26 @@ void Data::put_symbol(std::string name, bool is_const) {
 
     std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, this->memory_offset, is_const);
     this->memory_offset++;
+    this->sym_map[name] = sym;
+}
+
+void Data::put_array(std::string name, long long array_start, long long array_end) {
+    if (this->check_context(name)) {
+        throw std::string(name + " - already defined");
+    }
+
+    if (array_end < array_start) {
+        throw std::string(name + " - bad range");
+    }
+
+    std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, this->memory_offset, array_start, array_end);
+
+    this->memory_offset += abs(array_start) + abs(array_end) + 1;
+    this->sym_map[name] = sym;
+}
+
+void Data::put_array_cell(std::string name, long long offset) {
+    std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, offset, false, true);
     this->sym_map[name] = sym;
 }
 
