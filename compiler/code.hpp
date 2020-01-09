@@ -27,6 +27,7 @@ class Code {
 
         void load_value(symbol* sym);
         void plus(symbol* a, symbol* b);
+        void minus(symbol* a, symbol* b);
 
         // VALUES & PIDs
 

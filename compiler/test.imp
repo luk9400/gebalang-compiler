@@ -1,7 +1,8 @@
 DECLARE
     a, b
 BEGIN
-    b ASSIGN 4;
-    a ASSIGN 4 PLUS b;
+    READ a;
+    READ b;
+    a ASSIGN a MINUS b;
     WRITE a;
 END

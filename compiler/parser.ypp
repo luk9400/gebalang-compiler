@@ -73,7 +73,7 @@ command:       identifier ASSIGN expression';'                      { code->assi
 
 expression:    value                                                { code->load_value($1); }
               | value PLUS value                                    { code->plus($1, $3); }
-              | value MINUS value
+              | value MINUS value                                   { code->minus($1, $3); }
               | value TIMES value
               | value DIV value
               | value MOD value

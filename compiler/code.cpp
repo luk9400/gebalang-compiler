@@ -61,6 +61,15 @@ void Code::plus(symbol* a, symbol* b) {
     this->pc += 2;
 }
 
+void Code::minus(symbol* a, symbol* b) {
+    this->check_init(a);
+    this->check_init(b);
+    
+    this->code.push_back("LOAD " + std::to_string(a->offset));
+    this->code.push_back("SUB " + std::to_string(b->offset));
+    this->pc += 2;
+}
+
 // VALUES & PIDs
 
 symbol* Code::get_num(long long num) {
