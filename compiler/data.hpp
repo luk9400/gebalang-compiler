@@ -15,7 +15,7 @@ class Data {
         Data();
 
         bool check_context(std::string name);
-        void put_symbol(std::string name);
+        void put_symbol(std::string name, bool is_const);
         symbol* get_symbol(std::string name);
 
         void init_constant(std::string name, long long value);

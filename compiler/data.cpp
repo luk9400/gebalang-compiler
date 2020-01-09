@@ -28,12 +28,12 @@ symbol* Data::get_symbol(std::string name) {
     return this->sym_map[name].get();
 }
 
-void Data::put_symbol(std::string name) {
+void Data::put_symbol(std::string name, bool is_const) {
     if (this->check_context(name)) {
         throw std::string(name + " - already defined");
     }
 
-    std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, this->memory_offset);
+    std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, this->memory_offset, is_const);
     this->memory_offset++;
     this->sym_map[name] = sym;
 }

@@ -1,6 +1,7 @@
-DECLARE 
-    a
-BEGIN  
-    READ b;
+DECLARE
+    a, b
+BEGIN
+    b ASSIGN 4;
+    a ASSIGN 4 PLUS b;
     WRITE a;
 END

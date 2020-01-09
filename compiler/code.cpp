@@ -1,10 +1,10 @@
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
-#include "symbol.hpp"
-#include "data.hpp"
 #include "code.hpp"
+#include "data.hpp"
+#include "symbol.hpp"
 
 Code::Code(std::shared_ptr<Data> data) {
     this->pc = 0;
@@ -20,17 +20,70 @@ void Code::end_code() {
     this->pc++;
 }
 
-void Code::write(long long offset) {
-    this->code.push_back("LOAD " + std::to_string(offset));
+// COMMANDS
+
+void Code::assign(symbol* var) {
+    this->code.push_back("STORE " + std::to_string(var->offset));
+    var->is_init = true;
+    this->pc++;
+}
+
+void Code::write(symbol* sym) {
+    this->check_init(sym);
+
+    this->code.push_back("LOAD " + std::to_string(sym->offset));
     this->code.push_back("PUT");
     this->pc += 2;
 }
 
-void Code::read(long long offset) {
+void Code::read(symbol* sym) {
     this->code.push_back("GET");
-    this->code.push_back("STORE " + std::to_string(offset));
+    this->code.push_back("STORE " + std::to_string(sym->offset));
+    sym->is_init = true;
     this->pc += 2;
 }
+
+// EXPRESSIONS
+
+void Code::load_value(symbol* sym) {
+    this->check_init(sym);
+
+    this->code.push_back("LOAD " + std::to_string(sym->offset));
+    this->pc++;
+}
+
+void Code::plus(symbol* a, symbol* b) {
+    this->check_init(a);
+    this->check_init(b);
+    
+    this->code.push_back("LOAD " + std::to_string(a->offset));
+    this->code.push_back("ADD " + std::to_string(b->offset));
+    this->pc += 2;
+}
+
+// VALUES & PIDs
+
+symbol* Code::get_num(long long num) {
+    // get constant if its declared
+    if (this->data->check_context(std::to_string(num))) {
+        return this->data->get_symbol(std::to_string(num));
+    } else {  // declare const
+        this->data->put_symbol(std::to_string(num), true);
+
+        return this->data->get_symbol(std::to_string(num));
+    }
+}
+
+symbol* Code::pidentifier(std::string name) {
+    symbol* sym = this->data->get_symbol(name);
+    if (sym != nullptr) {
+        return sym;
+    } else {
+        throw std::string(name + " - symbol does not exist");
+    }
+}
+
+// MISC
 
 void Code::generate_constant(long long value, long long offset) {
     this->code.push_back("SUB 0");
@@ -46,36 +99,22 @@ void Code::generate_constant(long long value, long long offset) {
             this->pc++;
         }
     }
-    
+
     this->code.push_back("STORE " + std::to_string(offset));
     this->pc += 2;
 }
 
-long long Code::get_num(long long num) {
-    // get constant if its initialized
-    if (this->data->check_context(std::to_string(num))) {
-        return this->data->get_symbol(std::to_string(num))->offset;
-    } else { // initialize constant and put it in p0
-        this->data->put_symbol(std::to_string(num));
-        this->data->init_constant(std::to_string(num), num);
-
-        long long offset = this->data->get_symbol(std::to_string(num))->offset;
-
-        this->generate_constant(num, offset);
-
-        return offset;
-    }
+void Code::init_const(symbol* sym) {
+    this->data->init_constant(sym->name, std::stoll(sym->name));
+    this->generate_constant(std::stoll(sym->name), sym->offset);
 }
 
-void Code::assign(long long var_offset, long long value_offset) {
-        this->code.push_back("LOAD " + std::to_string(value_offset));
-        this->code.push_back("STORE " + std::to_string(var_offset));
-        this->pc += 2;
-}
-
-long long Code::pidentifier(std::string name) {
-    symbol* sym = this->data->get_symbol(name);
-    if (sym != nullptr) {
-        return sym->offset;
+void Code::check_init(symbol* sym) {
+    if (!sym->is_init) {
+        if (sym->is_const) {
+            this->init_const(sym);
+        } else {
+            throw std::string(sym->name + " - symbol is not initialized");
+        }
     }
 }
