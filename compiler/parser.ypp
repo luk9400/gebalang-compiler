@@ -92,7 +92,7 @@ value:         num                                                  { $$ = code-
 ;
 
 identifier:    pidentifier                                          { $$ = code->pidentifier(*$1); }
-              | pidentifier'('pidentifier')'                        
+              | pidentifier'('pidentifier')'                        { $$ = code->array_pid_pidentifier(*$1, *$3); }
               | pidentifier'('num')'                                { $$ = code->array_num_pidentifier(*$1, $3); }    
 ;
 %%

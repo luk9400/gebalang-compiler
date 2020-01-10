@@ -47,4 +47,10 @@ class Code {
          *  otherwise throws exception 
          */
         void check_init(symbol* sym);
+
+        // ASSEMBLER COMMANDS
+        void ADD(long long offset);
+        void SUB(long long offset);
+        void store(symbol* sym);
+        void load(symbol* sym);
 };

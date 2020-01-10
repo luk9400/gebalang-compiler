@@ -1,7 +1,7 @@
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "code.hpp"
 #include "data.hpp"
@@ -24,7 +24,7 @@ void Code::end_code() {
 // COMMANDS
 
 void Code::assign(symbol* var) {
-    this->code.push_back("STORE " + std::to_string(var->offset));
+    this->store(var);
     var->is_init = true;
     this->pc++;
 }
@@ -32,14 +32,14 @@ void Code::assign(symbol* var) {
 void Code::write(symbol* sym) {
     this->check_init(sym);
 
-    this->code.push_back("LOAD " + std::to_string(sym->offset));
+    this->load(sym);
     this->code.push_back("PUT");
     this->pc += 2;
 }
 
 void Code::read(symbol* sym) {
     this->code.push_back("GET");
-    this->code.push_back("STORE " + std::to_string(sym->offset));
+    this->store(sym);
     sym->is_init = true;
     this->pc += 2;
 }
@@ -49,26 +49,46 @@ void Code::read(symbol* sym) {
 void Code::load_value(symbol* sym) {
     this->check_init(sym);
 
-    this->code.push_back("LOAD " + std::to_string(sym->offset));
+    this->load(sym);
     this->pc++;
 }
 
 void Code::plus(symbol* a, symbol* b) {
     this->check_init(a);
     this->check_init(b);
-    
-    this->code.push_back("LOAD " + std::to_string(a->offset));
-    this->code.push_back("ADD " + std::to_string(b->offset));
-    this->pc += 2;
+
+    if (a->is_addr_cell && b->is_addr_cell) {
+        this->load(a);
+        this->code.push_back("STORE " + std::to_string(this->data->memory_offset));
+        this->load(b);
+        this->ADD(this->data->memory_offset);
+        this->pc += 4;
+    } else if (b->is_addr_cell && !a->is_addr_cell) {
+        this->load(b);
+        this->ADD(a->offset);
+        this->pc += 2;
+    } else {
+        this->load(a);
+        this->ADD(b->offset);
+        this->pc += 2;
+    }
 }
 
 void Code::minus(symbol* a, symbol* b) {
     this->check_init(a);
     this->check_init(b);
-    
-    this->code.push_back("LOAD " + std::to_string(a->offset));
-    this->code.push_back("SUB " + std::to_string(b->offset));
-    this->pc += 2;
+
+    if (b->is_addr_cell) {
+        this->load(b);
+        this->code.push_back("STORE " + std::to_string(this->data->memory_offset));
+        this->load(a);
+        this->SUB(this->data->memory_offset);
+        this->pc += 4;
+    } else {
+        this->load(a);
+        this->SUB(b->offset);
+        this->pc += 2;
+    }
 }
 
 // VALUES & PIDs
@@ -104,13 +124,39 @@ symbol* Code::array_num_pidentifier(std::string name, long long num) {
             }
             this->data->put_array_cell(name + std::to_string(num), offset);
             symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
-            
+
             return ret_sym;
         } else {
             throw std::string(name + " - index out of boundry");
         }
     } else {
         throw std::string(name + " - array does not exist");
+    }
+}
+
+symbol* Code::array_pid_pidentifier(std::string name, std::string pid_name) {
+    symbol* array = this->data->get_symbol(name);
+    symbol* var = this->data->get_symbol(pid_name);
+
+    if (array != nullptr && var != nullptr) {
+        // init constants
+        symbol* array_start = this->get_num(array->array_start);
+        this->check_init(array_start);
+        symbol* array_offset = this->get_num(array->offset);
+        this->check_init(array_offset);
+
+        // calculate address of a cell
+        this->code.push_back("LOAD " + std::to_string(var->offset));
+        this->code.push_back("SUB " + std::to_string(array_start->offset));
+        this->code.push_back("ADD " + std::to_string(array_offset->offset));
+
+        // save address
+        this->data->put_addr_cell("tmp" + std::to_string(this->data->memory_offset), this->data->memory_offset);
+        symbol* cell_address = this->data->get_symbol("tmp" + std::to_string(this->data->memory_offset));
+        this->code.push_back("STORE " + std::to_string(cell_address->offset));
+        this->data->memory_offset++;
+
+        return cell_address;
     }
 }
 
@@ -141,7 +187,7 @@ void Code::init_const(symbol* sym) {
 }
 
 void Code::check_init(symbol* sym) {
-    if (sym->is_array_cell) {
+    if (sym->is_array_cell || sym->is_addr_cell) {
         return;
     }
     if (!sym->is_init) {
@@ -150,5 +196,31 @@ void Code::check_init(symbol* sym) {
         } else {
             throw std::string(sym->name + " - symbol is not initialized");
         }
+    }
+}
+
+// ASSEMBLER COMMANDS
+
+void Code::ADD(long long offset) {
+    this->code.push_back("ADD " + std::to_string(offset));
+}
+
+void Code::SUB(long long offset) {
+    this->code.push_back("SUB " + std::to_string(offset));
+}
+
+void Code::store(symbol* sym) {
+    if (sym->is_addr_cell) {
+        this->code.push_back("STOREI " + std::to_string(sym->offset));
+    } else {
+        this->code.push_back("STORE " + std::to_string(sym->offset));
+    }
+}
+
+void Code::load(symbol* sym) {
+    if (sym->is_addr_cell) {
+        this->code.push_back("LOADI " + std::to_string(sym->offset));
+    } else {
+        this->code.push_back("LOAD " + std::to_string(sym->offset));
     }
 }

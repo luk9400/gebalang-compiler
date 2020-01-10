@@ -2,7 +2,6 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <cmath>
 
 #include "data.hpp"
 #include "symbol.hpp"
@@ -50,11 +49,16 @@ void Data::put_array(std::string name, long long array_start, long long array_en
 
     std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, this->memory_offset, array_start, array_end);
 
-    this->memory_offset += abs(array_start) + abs(array_end) + 1;
+    this->memory_offset += array_end - array_start + 1;
     this->sym_map[name] = sym;
 }
 
 void Data::put_array_cell(std::string name, long long offset) {
+    std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, offset, true, false);
+    this->sym_map[name] = sym;
+}
+
+void Data::put_addr_cell(std::string name, long long offset) {
     std::shared_ptr<symbol> sym = std::make_shared<symbol>(name, offset, false, true);
     this->sym_map[name] = sym;
 }
