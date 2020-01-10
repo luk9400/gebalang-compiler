@@ -31,10 +31,7 @@ void Code::assign(symbol* var) {
 }
 
 void Code::if_block(cond_label* label) {
-    std::cout << label->go_to << std::endl;
-    std::cout << this->code[label->go_to] << std::endl;
-    std::cout << this->pc << std::endl;
-    this->code[label->go_to - 1] += std::to_string(this->pc);
+    this->code[label->go_to] += std::to_string(this->pc);
 }
 
 void Code::write(symbol* sym) {
@@ -107,7 +104,7 @@ cond_label* Code::eq(symbol* a, symbol* b) {
     this->code.push_back("JZERO " + std::to_string(this->pc + 2));
     this->code.push_back("JUMP ");
     this->pc += 2;
-    long long addr = this->pc;
+    long long addr = this->pc - 1;
 
     std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
     return label.get();
