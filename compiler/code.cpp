@@ -6,6 +6,7 @@
 #include "code.hpp"
 #include "data.hpp"
 #include "symbol.hpp"
+#include "labels.hpp"
 
 Code::Code(std::shared_ptr<Data> data) {
     this->pc = 0;
@@ -27,6 +28,13 @@ void Code::assign(symbol* var) {
     this->store(var);
     var->is_init = true;
     this->pc++;
+}
+
+void Code::if_block(cond_label* label) {
+    std::cout << label->go_to << std::endl;
+    std::cout << this->code[label->go_to] << std::endl;
+    std::cout << this->pc << std::endl;
+    this->code[label->go_to - 1] += std::to_string(this->pc);
 }
 
 void Code::write(symbol* sym) {
@@ -89,6 +97,20 @@ void Code::minus(symbol* a, symbol* b) {
         this->SUB(b->offset);
         this->pc += 2;
     }
+}
+
+// CONDITIONS
+
+cond_label* Code::eq(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JZERO " + std::to_string(this->pc + 2));
+    this->code.push_back("JUMP ");
+    this->pc += 2;
+    long long addr = this->pc;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
 }
 
 // VALUES & PIDs
@@ -155,6 +177,7 @@ symbol* Code::array_pid_pidentifier(std::string name, std::string pid_name) {
         symbol* cell_address = this->data->get_symbol("tmp" + std::to_string(this->data->memory_offset));
         this->code.push_back("STORE " + std::to_string(cell_address->offset));
         this->data->memory_offset++;
+        this->pc += 4;
 
         return cell_address;
     }

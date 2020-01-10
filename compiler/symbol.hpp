@@ -2,7 +2,7 @@
 
 #include <string>
 
-typedef struct symbol{
+typedef struct symbol {
     std::string name;
     long long offset;
     long long value;
@@ -23,7 +23,7 @@ typedef struct symbol{
         this->is_const = is_const;
         this->is_array = false;
         this->is_array_cell = false;
-        this->is_addr_cell = false; 
+        this->is_addr_cell = false;
     }
 
     // array cells
@@ -34,7 +34,7 @@ typedef struct symbol{
         this->is_const = false;
         this->is_array = false;
         this->is_array_cell = is_array_cell;
-        this->is_addr_cell = is_addr_cell; 
+        this->is_addr_cell = is_addr_cell;
     }
 
     // arrays

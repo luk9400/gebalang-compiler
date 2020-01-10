@@ -7,6 +7,7 @@
 #include <streambuf>
 
 #include "data.hpp"
+#include "labels.hpp"
 #include "code.hpp"
 
 int yylex();
@@ -24,6 +25,7 @@ std::shared_ptr<Code> code = std::make_shared<Code>(data);
     std::string* pidentifier;
     long long num;
     symbol* sym;
+    cond_label* label;
 }
 
 %start program
@@ -43,6 +45,7 @@ std::shared_ptr<Code> code = std::make_shared<Code>(data);
 %type <sym> value
 %type <sym> expression
 %type <sym> identifier
+%type <label> condition
 
 %%
 
@@ -62,7 +65,7 @@ commands:      commands command
 
 command:       identifier ASSIGN expression';'                      { code->assign($1); }
               | IF condition THEN commands ELSE commands ENDIF
-              | IF condition THEN commands ENDIF
+              | IF condition THEN commands ENDIF                    { code->if_block($2); }
               | WHILE condition DO commands ENDWHILE
               | DO commands WHILE condition ENDDO
               | FOR pidentifier FROM value TO value DO commands ENDFOR
@@ -79,7 +82,7 @@ expression:    value                                                { code->load
               | value MOD value
 ;              
 
-condition:     value EQ value
+condition:     value EQ value                                       { $$ = code->eq($1, $3); }
               | value NEQ value
               | value LE value
               | value GE value

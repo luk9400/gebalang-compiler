@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "data.hpp"
+#include "labels.hpp"
 
 class Code {
     private:
@@ -20,6 +21,7 @@ class Code {
         // COMMANDS
 
         void assign(symbol* var);
+        void if_block(cond_label* label);
         void write(symbol* sym);
         void read(symbol* sym);
 
@@ -28,6 +30,9 @@ class Code {
         void load_value(symbol* sym);
         void plus(symbol* a, symbol* b);
         void minus(symbol* a, symbol* b);
+
+        // CONDITIONS
+        cond_label* eq(symbol* a, symbol* b);
 
         // VALUES & PIDs
 

@@ -1,14 +1,7 @@
-DECLARE
-    a(0:2), b, c, d
 BEGIN
-    b ASSIGN 0;
-    c ASSIGN 1;
-    d ASSIGN 2;
-
-    a(c) ASSIGN 2;
-    a(d) ASSIGN 1;
-
-    a(b) ASSIGN a(c) PLUS a(d);
-
-    WRITE a(b);
+    WRITE 1;
+    IF 1 EQ 1 THEN
+        WRITE 2;
+    ENDIF
+    WRITE 3;
 END
