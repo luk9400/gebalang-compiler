@@ -35,6 +35,7 @@ class Code {
         void load_value(symbol* sym);
         void plus(symbol* a, symbol* b);
         void minus(symbol* a, symbol* b);
+        void times(symbol* a, symbol* b);
 
         // CONDITIONS
         cond_label* eq(symbol* a, symbol* b);
@@ -69,6 +70,7 @@ class Code {
         void SHIFT(long long offset);
         void INC();
         void DEC();
+        void STORE(long long offset);
         void store(symbol* sym);
         void load(symbol* sym);
 };

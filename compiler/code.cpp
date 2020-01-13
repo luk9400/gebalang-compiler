@@ -129,6 +129,39 @@ void Code::minus(symbol* a, symbol* b) {
     }
 }
 
+void Code::times(symbol* a, symbol* b) {
+    symbol* A = this->data->get_symbol("A");
+    symbol* B = this->data->get_symbol("B");
+    symbol* C = this->data->get_symbol("C");
+    symbol* one = this->data->get_symbol("1");
+    symbol* minus_one = this->data->get_symbol("-1");
+
+    this->check_init(one);
+    this->check_init(minus_one);    
+
+
+    // result = 0 in register C
+    this->code.push_back("SUB 0");
+    this->STORE(C->offset);
+
+    // copy a and b, and leave a in p0
+    this->load(b);
+    this->STORE(B->offset);
+    this->load(a);
+    this->STORE(A->offset);
+
+    this->pc += 6;
+
+    // flip a if its negative
+    this->code.push_back("JPOS " + std::to_string(this->pc + 4));
+    this->SUB(A->offset);
+    this->SUB(A->offset);
+    this->STORE(A->offset);
+
+    // while (a != 0)
+
+}
+
 // CONDITIONS
 
 cond_label* Code::eq(symbol* a, symbol* b) {
@@ -375,6 +408,10 @@ void Code::INC() {
 
 void Code::DEC() {
     this->code.push_back("DEC");
+}
+
+void Code::STORE(long long offset) {
+    this->code.push_back("STORE " + std::to_string(offset));
 }
 
 void Code::store(symbol* sym) {

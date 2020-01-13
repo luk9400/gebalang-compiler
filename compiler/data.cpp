@@ -9,7 +9,10 @@
 Data::Data() {
     this->memory_offset = 1;
     this->put_symbol("1", true);
+    this->put_symbol("-1", true);
     this->put_symbol("A", false);
+    this->put_symbol("B", false);
+    this->put_symbol("C", false);
 }
 
 bool Data::check_context(std::string name) {
