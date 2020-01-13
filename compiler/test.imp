@@ -2,8 +2,8 @@ DECLARE
     i
 BEGIN
     i ASSIGN 5;
-    WHILE i GE 0 DO
+    DO
         WRITE i;
         i ASSIGN i MINUS 1;
-    ENDWHILE
+    WHILE i GE 0 ENDDO
 END

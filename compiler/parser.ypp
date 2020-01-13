@@ -30,7 +30,7 @@ std::shared_ptr<Code> code = std::make_shared<Code>(data);
 
 %start program
 %token DECLARE TBEGIN END
-%token IF WHILE DO FOR
+%token <label> IF WHILE DO FOR
 %token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
 %token READ WRITE
 %token LE GE LEQ GEQ EQ NEQ
@@ -64,10 +64,12 @@ commands:      commands command
 ;              
 
 command:       identifier ASSIGN expression';'                      { code->assign($1); }
-              | IF condition THEN commands ELSE commands ENDIF
+              | IF condition THEN commands                          { $1 = code->if_else_first_block($2); }
+                ELSE commands ENDIF                                 { code->if_else_second_block($1); }
               | IF condition THEN commands ENDIF                    { code->if_block($2); }
               | WHILE condition DO commands ENDWHILE                { code->while_block($2); }
-              | DO commands WHILE condition ENDDO
+              | DO                                                  { $1 = code->do_while_first_block(); }
+                commands WHILE condition ENDDO                      { code->do_while_second_block($1, $5); }
               | FOR pidentifier FROM value TO value DO commands ENDFOR
               | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
               | READ identifier';'                                  { code->read($2); }

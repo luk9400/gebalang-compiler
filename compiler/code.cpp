@@ -34,12 +34,37 @@ void Code::if_block(cond_label* label) {
     this->code[label->go_to] += std::to_string(this->pc);
 }
 
+cond_label* Code::if_else_first_block(cond_label* label) {
+    this->code.push_back("JUMP ");
+    this->pc++;
+
+    this->if_block(label);
+
+    label->go_to = this->pc - 1;
+    return label;
+}
+
+void Code::if_else_second_block(cond_label* label) {
+    this->if_block(label);
+}
+
 void Code::while_block(cond_label* label) {
     std::cout << label->start << std::endl;
     std::cout << label->go_to << std::endl;
     this->code.push_back("JUMP " + std::to_string(label->start));
     this->pc++;
     this->if_block(label);
+}
+
+cond_label* Code::do_while_first_block() {
+    return new cond_label(0, this->pc - 1);
+}
+
+void Code::do_while_second_block(cond_label* label, cond_label* cond) {
+    this->code.push_back("JUMP " + std::to_string(label->go_to));
+    this->pc++;
+
+    this->if_block(cond);
 }
 
 void Code::write(symbol* sym) {
