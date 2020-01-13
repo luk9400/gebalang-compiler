@@ -5,8 +5,8 @@
 
 #include "code.hpp"
 #include "data.hpp"
-#include "symbol.hpp"
 #include "labels.hpp"
+#include "symbol.hpp"
 
 Code::Code(std::shared_ptr<Data> data) {
     this->pc = 0;
@@ -110,6 +110,64 @@ cond_label* Code::eq(symbol* a, symbol* b) {
     return label.get();
 }
 
+cond_label* Code::neq(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JZERO ");
+    this->pc++;
+    long long addr = this->pc - 1;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
+}
+
+cond_label* Code::le(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JNEG " + std::to_string(this->pc + 2));
+    this->code.push_back("JUMP ");
+    this->pc += 2;
+    long long addr = this->pc - 1;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
+}
+
+cond_label* Code::ge(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JPOS " + std::to_string(this->pc + 2));
+    this->code.push_back("JUMP ");
+    this->pc += 2;
+    long long addr = this->pc - 1;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
+}
+
+
+cond_label* Code::leq(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JPOS ");
+    this->pc++;
+    long long addr = this->pc - 1;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
+}
+
+cond_label* Code::geq(symbol* a, symbol* b) {
+    long long start = this->pc;
+    this->minus(a, b);
+    this->code.push_back("JNEG ");
+    this->pc++;
+    long long addr = this->pc - 1;
+
+    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
+    return label.get();
+}
+
 // VALUES & PIDs
 
 symbol* Code::get_num(long long num) {
@@ -183,22 +241,68 @@ symbol* Code::array_pid_pidentifier(std::string name, std::string pid_name) {
 // MISC
 
 void Code::generate_constant(long long value, long long offset) {
-    this->code.push_back("SUB 0");
-    if (value > 0) {
-        for (long long i = 0; i < value; i++) {
-            this->code.push_back("INC");
-            this->pc++;
-        }
+    long long digits[64];
+    bool nonnegative = (value >= 0);
+
+    symbol* regOne = this->data->get_symbol("1");
+    if (!regOne->is_init) {
+        this->code.push_back("SUB 0");
+        this->INC();
+        this->store(regOne);
+        this->pc += 3;
+        regOne->is_init = true;
     }
-    if (value < 0) {
-        for (long long i = 0; i < -value; i++) {
-            this->code.push_back("DEC");
+
+    this->code.push_back("SUB 0");
+
+    long long i = 0;
+    while (value != 0) {
+        digits[i] = abs(value % 2);
+        value /= 2;
+        i++;
+    }
+    i--;
+
+    for (; i > 0; i--) {
+        if (digits[i] == 1) {
+            if (nonnegative) {
+                this->INC();
+            } else {
+                this->DEC();
+            }
             this->pc++;
         }
+        this->SHIFT(regOne->offset);
+        this->pc++;
+    }
+
+    if (digits[i] == 1) {
+        if (nonnegative) {
+            this->INC();
+        } else {
+            this->DEC();
+        }
+        this->pc++;
     }
 
     this->code.push_back("STORE " + std::to_string(offset));
     this->pc += 2;
+
+    // if (value > 0) {
+    //     for (long long i = 0; i < value; i++) {
+    //         this->code.push_back("INC");
+    //         this->pc++;
+    //     }
+    // }
+    // if (value < 0) {
+    //     for (long long i = 0; i < -value; i++) {
+    //         this->code.push_back("DEC");
+    //         this->pc++;
+    //     }
+    // }
+
+    // this->code.push_back("STORE " + std::to_string(offset));
+    // this->pc += 2;
 }
 
 void Code::init_const(symbol* sym) {
@@ -227,6 +331,18 @@ void Code::ADD(long long offset) {
 
 void Code::SUB(long long offset) {
     this->code.push_back("SUB " + std::to_string(offset));
+}
+
+void Code::SHIFT(long long offset) {
+    this->code.push_back("SHIFT " + std::to_string(offset));
+}
+
+void Code::INC() {
+    this->code.push_back("INC");
+}
+
+void Code::DEC() {
+    this->code.push_back("DEC");
 }
 
 void Code::store(symbol* sym) {

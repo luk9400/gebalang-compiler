@@ -1,6 +1,6 @@
 BEGIN
     WRITE 1;
-    IF 1 EQ 1 THEN
+    IF 43 GEQ 3 THEN
         WRITE 2;
     ENDIF
     WRITE 3;

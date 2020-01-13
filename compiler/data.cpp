@@ -8,6 +8,8 @@
 
 Data::Data() {
     this->memory_offset = 1;
+    this->put_symbol("1", true);
+    this->put_symbol("A", false);
 }
 
 bool Data::check_context(std::string name) {

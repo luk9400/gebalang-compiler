@@ -33,6 +33,11 @@ class Code {
 
         // CONDITIONS
         cond_label* eq(symbol* a, symbol* b);
+        cond_label* neq(symbol* a, symbol* b);
+        cond_label* le(symbol* a, symbol* b);
+        cond_label* ge(symbol* a, symbol* b);
+        cond_label* leq(symbol* a, symbol* b);
+        cond_label* geq(symbol* a, symbol* b);
 
         // VALUES & PIDs
 
@@ -56,6 +61,9 @@ class Code {
         // ASSEMBLER COMMANDS
         void ADD(long long offset);
         void SUB(long long offset);
+        void SHIFT(long long offset);
+        void INC();
+        void DEC();
         void store(symbol* sym);
         void load(symbol* sym);
 };
