@@ -1,7 +1,9 @@
+DECLARE
+    i
 BEGIN
-    WRITE 1;
-    IF 43 GEQ 3 THEN
-        WRITE 2;
-    ENDIF
-    WRITE 3;
+    i ASSIGN 5;
+    WHILE i GE 0 DO
+        WRITE i;
+        i ASSIGN i MINUS 1;
+    ENDWHILE
 END

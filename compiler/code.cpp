@@ -34,6 +34,14 @@ void Code::if_block(cond_label* label) {
     this->code[label->go_to] += std::to_string(this->pc);
 }
 
+void Code::while_block(cond_label* label) {
+    std::cout << label->start << std::endl;
+    std::cout << label->go_to << std::endl;
+    this->code.push_back("JUMP " + std::to_string(label->start));
+    this->pc++;
+    this->if_block(label);
+}
+
 void Code::write(symbol* sym) {
     this->check_init(sym);
 
@@ -106,8 +114,8 @@ cond_label* Code::eq(symbol* a, symbol* b) {
     this->pc += 2;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
 
 cond_label* Code::neq(symbol* a, symbol* b) {
@@ -117,8 +125,8 @@ cond_label* Code::neq(symbol* a, symbol* b) {
     this->pc++;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
 
 cond_label* Code::le(symbol* a, symbol* b) {
@@ -129,8 +137,8 @@ cond_label* Code::le(symbol* a, symbol* b) {
     this->pc += 2;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
 
 cond_label* Code::ge(symbol* a, symbol* b) {
@@ -141,10 +149,9 @@ cond_label* Code::ge(symbol* a, symbol* b) {
     this->pc += 2;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
-
 
 cond_label* Code::leq(symbol* a, symbol* b) {
     long long start = this->pc;
@@ -153,8 +160,8 @@ cond_label* Code::leq(symbol* a, symbol* b) {
     this->pc++;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
 
 cond_label* Code::geq(symbol* a, symbol* b) {
@@ -164,8 +171,8 @@ cond_label* Code::geq(symbol* a, symbol* b) {
     this->pc++;
     long long addr = this->pc - 1;
 
-    std::shared_ptr<cond_label> label = std::make_shared<cond_label>(start, addr);
-    return label.get();
+    cond_label* label = new cond_label(start, addr);
+    return label;
 }
 
 // VALUES & PIDs

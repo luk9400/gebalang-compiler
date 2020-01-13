@@ -22,6 +22,7 @@ class Code {
 
         void assign(symbol* var);
         void if_block(cond_label* label);
+        void while_block(cond_label* label);
         void write(symbol* sym);
         void read(symbol* sym);
 
