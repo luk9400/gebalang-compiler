@@ -119,12 +119,9 @@ void Code::times(symbol* a, symbol* b) {
     symbol* A = this->data->get_symbol("A");
     symbol* B = this->data->get_symbol("B");
     symbol* C = this->data->get_symbol("C");
+    symbol* D = this->data->get_symbol("D");
     symbol* one = this->data->get_symbol("1");
     symbol* minus_one = this->data->get_symbol("-1");
-
-    std::cout << A->offset <<std::endl;
-    std::cout << B->offset <<std::endl;
-    std::cout << C->offset <<std::endl;
 
     this->check_init(one);
     this->check_init(minus_one);
@@ -140,6 +137,8 @@ void Code::times(symbol* a, symbol* b) {
     this->STORE(B->offset);
     this->load(a);
     this->STORE(A->offset);
+    // copy original a to remember sign bit
+    this->STORE(D->offset);
 
     // flip a if its negative
     this->JPOS(this->pc + 4);  //hmmm
@@ -150,8 +149,8 @@ void Code::times(symbol* a, symbol* b) {
     // while (a != 0) {
     this->JZERO(this->pc + 15);  // COUNT THIS!!!
     // if (a & 1) {
-    this->SHIFT(one->offset);
     this->SHIFT(minus_one->offset);
+    this->SHIFT(one->offset);
     this->SUB(A->offset);
 
     this->JZERO(this->pc + 4);  //hmmm
@@ -171,12 +170,14 @@ void Code::times(symbol* a, symbol* b) {
     this->JUMP(this->pc - 14);  //hmmm
     // }
 
-    this->LOAD(A->offset);
-    this->JPOS(this->pc + 6);
+    // flip result if a was negative
+    this->LOAD(D->offset);
+    this->JPOS(this->pc + 5);
     this->LOAD(C->offset);
     this->SUB(C->offset);
     this->SUB(C->offset);
     this->STORE(C->offset);
+    
     this->LOAD(C->offset);
 }
 
