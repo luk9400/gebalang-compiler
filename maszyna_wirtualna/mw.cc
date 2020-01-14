@@ -17,6 +17,15 @@
 
 #include "instructions.hh"
 
+#define MEMORY_DEBUG_SIZE 20
+
+void show_memory(std::map<long long,long long>& pam) {
+  for (int i = 0; i < MEMORY_DEBUG_SIZE; i++) {
+    std::cout << "|" << pam[i]; 
+  }
+  std::cout << "|" << std::endl;
+}
+
 void run_machine( std::vector< std::pair<int,long long> > & program )
 {
   std::map<long long,long long> pam;
@@ -38,13 +47,13 @@ void run_machine( std::vector< std::pair<int,long long> > & program )
       case PUT:		std::cout << "> " << pam[0] << std::endl; t+=100; lr++; break;
 
       case LOAD:	pam[0] = pam[program[lr].second]; t+=10; lr++; break;
-      case STORE:	pam[program[lr].second] = pam[0]; t+=10; lr++; break;
+      case STORE:	pam[program[lr].second] = pam[0]; t+=10; lr++; show_memory(pam); break;
       case LOADI:	adr = pam[program[lr].second];
                         if( adr<0 ) { std::cerr << "Błąd: Wywołanie nieistniejącej komórki pamięci " << adr << "." << std::endl; exit(-1); }
                         pam[0] = pam[adr]; t+=20; lr++; break;
       case STOREI:	adr = pam[program[lr].second];
                         if( adr<0 ) { std::cerr << "Błąd: Wywołanie nieistniejącej komórki pamięci " << adr << "." << std::endl; exit(-1); }
-                        pam[adr] = pam[0]; t+=20; lr++; break;
+                        pam[adr] = pam[0]; t+=20; lr++; show_memory(pam); break;
 
       case ADD:		pam[0] += pam[program[lr].second] ; t+=10; lr++; break;
       case SUB:		pam[0] -= pam[program[lr].second] ; t+=10; lr++; break;

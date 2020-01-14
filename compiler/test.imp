@@ -1,9 +1,6 @@
 DECLARE
     i
 BEGIN
-    i ASSIGN 5;
-    DO
-        WRITE i;
-        i ASSIGN i MINUS 1;
-    WHILE i GE 0 ENDDO
+    i ASSIGN 20 TIMES 2;
+    WRITE i;
 END

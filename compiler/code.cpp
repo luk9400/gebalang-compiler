@@ -18,8 +18,7 @@ std::vector<std::string> Code::get_code() {
 }
 
 void Code::end_code() {
-    this->code.push_back("HALT");
-    this->pc++;
+    this->HALT();
 }
 
 // COMMANDS
@@ -27,7 +26,6 @@ void Code::end_code() {
 void Code::assign(symbol* var) {
     this->store(var);
     var->is_init = true;
-    this->pc++;
 }
 
 void Code::if_block(cond_label* label) {
@@ -35,8 +33,7 @@ void Code::if_block(cond_label* label) {
 }
 
 cond_label* Code::if_else_first_block(cond_label* label) {
-    this->code.push_back("JUMP ");
-    this->pc++;
+    this->JUMP();
 
     this->if_block(label);
 
@@ -49,10 +46,8 @@ void Code::if_else_second_block(cond_label* label) {
 }
 
 void Code::while_block(cond_label* label) {
-    std::cout << label->start << std::endl;
-    std::cout << label->go_to << std::endl;
-    this->code.push_back("JUMP " + std::to_string(label->start));
-    this->pc++;
+    this->JUMP(label->start);
+
     this->if_block(label);
 }
 
@@ -61,8 +56,7 @@ cond_label* Code::do_while_first_block() {
 }
 
 void Code::do_while_second_block(cond_label* label, cond_label* cond) {
-    this->code.push_back("JUMP " + std::to_string(label->go_to));
-    this->pc++;
+    this->JUMP(label->go_to);
 
     this->if_block(cond);
 }
@@ -71,15 +65,13 @@ void Code::write(symbol* sym) {
     this->check_init(sym);
 
     this->load(sym);
-    this->code.push_back("PUT");
-    this->pc += 2;
+    this->PUT();
 }
 
 void Code::read(symbol* sym) {
-    this->code.push_back("GET");
+    this->GET();
     this->store(sym);
     sym->is_init = true;
-    this->pc += 2;
 }
 
 // EXPRESSIONS
@@ -88,7 +80,6 @@ void Code::load_value(symbol* sym) {
     this->check_init(sym);
 
     this->load(sym);
-    this->pc++;
 }
 
 void Code::plus(symbol* a, symbol* b) {
@@ -97,18 +88,15 @@ void Code::plus(symbol* a, symbol* b) {
 
     if (a->is_addr_cell && b->is_addr_cell) {
         this->load(a);
-        this->code.push_back("STORE " + std::to_string(this->data->memory_offset));
+        this->STORE(this->data->memory_offset);
         this->load(b);
         this->ADD(this->data->memory_offset);
-        this->pc += 4;
     } else if (b->is_addr_cell && !a->is_addr_cell) {
         this->load(b);
         this->ADD(a->offset);
-        this->pc += 2;
     } else {
         this->load(a);
         this->ADD(b->offset);
-        this->pc += 2;
     }
 }
 
@@ -118,14 +106,12 @@ void Code::minus(symbol* a, symbol* b) {
 
     if (b->is_addr_cell) {
         this->load(b);
-        this->code.push_back("STORE " + std::to_string(this->data->memory_offset));
+        this->STORE(this->data->memory_offset);
         this->load(a);
         this->SUB(this->data->memory_offset);
-        this->pc += 4;
     } else {
         this->load(a);
         this->SUB(b->offset);
-        this->pc += 2;
     }
 }
 
@@ -136,12 +122,17 @@ void Code::times(symbol* a, symbol* b) {
     symbol* one = this->data->get_symbol("1");
     symbol* minus_one = this->data->get_symbol("-1");
 
-    this->check_init(one);
-    this->check_init(minus_one);    
+    std::cout << A->offset <<std::endl;
+    std::cout << B->offset <<std::endl;
+    std::cout << C->offset <<std::endl;
 
+    this->check_init(one);
+    this->check_init(minus_one);
+    this->check_init(a);
+    this->check_init(b);
 
     // result = 0 in register C
-    this->code.push_back("SUB 0");
+    this->SUB(0);
     this->STORE(C->offset);
 
     // copy a and b, and leave a in p0
@@ -150,16 +141,43 @@ void Code::times(symbol* a, symbol* b) {
     this->load(a);
     this->STORE(A->offset);
 
-    this->pc += 6;
-
     // flip a if its negative
-    this->code.push_back("JPOS " + std::to_string(this->pc + 4));
+    this->JPOS(this->pc + 4);  //hmmm
     this->SUB(A->offset);
     this->SUB(A->offset);
     this->STORE(A->offset);
 
-    // while (a != 0)
+    // while (a != 0) {
+    this->JZERO(this->pc + 15);  // COUNT THIS!!!
+    // if (a & 1) {
+    this->SHIFT(one->offset);
+    this->SHIFT(minus_one->offset);
+    this->SUB(A->offset);
 
+    this->JZERO(this->pc + 4);  //hmmm
+    this->LOAD(C->offset);
+    this->ADD(B->offset);
+    this->STORE(C->offset);
+    // }
+
+    // b = b << 1
+    this->LOAD(B->offset);
+    this->SHIFT(one->offset);
+    this->STORE(B->offset);
+    // a = a >> 1
+    this->LOAD(A->offset);
+    this->SHIFT(minus_one->offset);
+    this->STORE(A->offset);
+    this->JUMP(this->pc - 14);  //hmmm
+    // }
+
+    this->LOAD(A->offset);
+    this->JPOS(this->pc + 6);
+    this->LOAD(C->offset);
+    this->SUB(C->offset);
+    this->SUB(C->offset);
+    this->STORE(C->offset);
+    this->LOAD(C->offset);
 }
 
 // CONDITIONS
@@ -167,9 +185,8 @@ void Code::times(symbol* a, symbol* b) {
 cond_label* Code::eq(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JZERO " + std::to_string(this->pc + 2));
-    this->code.push_back("JUMP ");
-    this->pc += 2;
+    this->JZERO(this->pc + 2);
+    this->JUMP();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -179,8 +196,7 @@ cond_label* Code::eq(symbol* a, symbol* b) {
 cond_label* Code::neq(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JZERO ");
-    this->pc++;
+    this->JZERO();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -190,9 +206,8 @@ cond_label* Code::neq(symbol* a, symbol* b) {
 cond_label* Code::le(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JNEG " + std::to_string(this->pc + 2));
-    this->code.push_back("JUMP ");
-    this->pc += 2;
+    this->JNEG(this->pc + 2);
+    this->JUMP();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -202,9 +217,8 @@ cond_label* Code::le(symbol* a, symbol* b) {
 cond_label* Code::ge(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JPOS " + std::to_string(this->pc + 2));
-    this->code.push_back("JUMP ");
-    this->pc += 2;
+    this->JPOS(this->pc + 2);
+    this->JUMP();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -214,8 +228,7 @@ cond_label* Code::ge(symbol* a, symbol* b) {
 cond_label* Code::leq(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JPOS ");
-    this->pc++;
+    this->JPOS();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -225,8 +238,7 @@ cond_label* Code::leq(symbol* a, symbol* b) {
 cond_label* Code::geq(symbol* a, symbol* b) {
     long long start = this->pc;
     this->minus(a, b);
-    this->code.push_back("JNEG ");
-    this->pc++;
+    this->JNEG();
     long long addr = this->pc - 1;
 
     cond_label* label = new cond_label(start, addr);
@@ -264,9 +276,8 @@ symbol* Code::array_num_pidentifier(std::string name, long long num) {
             if (!this->data->check_context(name + std::to_string(num))) {
                 this->data->put_array_cell(name + std::to_string(num), offset);
             }
-            this->data->put_array_cell(name + std::to_string(num), offset);
-            symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
 
+            symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
             return ret_sym;
         } else {
             throw std::string(name + " - index out of boundry");
@@ -288,16 +299,15 @@ symbol* Code::array_pid_pidentifier(std::string name, std::string pid_name) {
         this->check_init(array_offset);
 
         // calculate address of a cell
-        this->code.push_back("LOAD " + std::to_string(var->offset));
-        this->code.push_back("SUB " + std::to_string(array_start->offset));
-        this->code.push_back("ADD " + std::to_string(array_offset->offset));
+        this->LOAD(var->offset);
+        this->SUB(array_start->offset);
+        this->ADD(array_offset->offset);
 
         // save address
-        this->data->put_addr_cell("tmp" + std::to_string(this->data->memory_offset), this->data->memory_offset);
-        symbol* cell_address = this->data->get_symbol("tmp" + std::to_string(this->data->memory_offset));
-        this->code.push_back("STORE " + std::to_string(cell_address->offset));
+        this->data->put_addr_cell("TMP" + std::to_string(this->data->memory_offset), this->data->memory_offset);
+        symbol* cell_address = this->data->get_symbol("TMP" + std::to_string(this->data->memory_offset));
+        this->STORE(cell_address->offset);
         this->data->memory_offset++;
-        this->pc += 4;
 
         return cell_address;
     }
@@ -311,18 +321,17 @@ void Code::generate_constant(long long value, long long offset) {
 
     symbol* regOne = this->data->get_symbol("1");
     if (!regOne->is_init) {
-        this->code.push_back("SUB 0");
+        this->SUB(0);
         this->INC();
         this->store(regOne);
-        this->pc += 3;
         regOne->is_init = true;
     }
 
-    this->code.push_back("SUB 0");
+    this->SUB(0);
 
     long long i = 0;
     while (value != 0) {
-        digits[i] = abs(value % 2);
+        digits[i] = llabs(value % 2);
         value /= 2;
         i++;
     }
@@ -335,10 +344,8 @@ void Code::generate_constant(long long value, long long offset) {
             } else {
                 this->DEC();
             }
-            this->pc++;
         }
         this->SHIFT(regOne->offset);
-        this->pc++;
     }
 
     if (digits[i] == 1) {
@@ -347,11 +354,9 @@ void Code::generate_constant(long long value, long long offset) {
         } else {
             this->DEC();
         }
-        this->pc++;
     }
 
-    this->code.push_back("STORE " + std::to_string(offset));
-    this->pc += 2;
+    this->STORE(offset);
 
     // if (value > 0) {
     //     for (long long i = 0; i < value; i++) {
@@ -390,28 +395,54 @@ void Code::check_init(symbol* sym) {
 
 // ASSEMBLER COMMANDS
 
+void Code::HALT() {
+    this->code.push_back("HALT");
+    this->pc++;
+}
+
+void Code::GET() {
+    this->code.push_back("GET");
+    this->pc++;
+}
+
+void Code::PUT() {
+    this->code.push_back("PUT");
+    this->pc++;
+}
+
 void Code::ADD(long long offset) {
     this->code.push_back("ADD " + std::to_string(offset));
+    this->pc++;
 }
 
 void Code::SUB(long long offset) {
     this->code.push_back("SUB " + std::to_string(offset));
+    this->pc++;
 }
 
 void Code::SHIFT(long long offset) {
     this->code.push_back("SHIFT " + std::to_string(offset));
+    this->pc++;
 }
 
 void Code::INC() {
     this->code.push_back("INC");
+    this->pc++;
 }
 
 void Code::DEC() {
     this->code.push_back("DEC");
+    this->pc++;
 }
 
 void Code::STORE(long long offset) {
     this->code.push_back("STORE " + std::to_string(offset));
+    this->pc++;
+}
+
+void Code::LOAD(long long offset) {
+    this->code.push_back("LOAD " + std::to_string(offset));
+    this->pc++;
 }
 
 void Code::store(symbol* sym) {
@@ -420,6 +451,7 @@ void Code::store(symbol* sym) {
     } else {
         this->code.push_back("STORE " + std::to_string(sym->offset));
     }
+    this->pc++;
 }
 
 void Code::load(symbol* sym) {
@@ -428,4 +460,45 @@ void Code::load(symbol* sym) {
     } else {
         this->code.push_back("LOAD " + std::to_string(sym->offset));
     }
+    this->pc++;
+}
+
+void Code::JUMP() {
+    this->code.push_back("JUMP ");
+    this->pc++;
+}
+
+void Code::JUMP(long long offset) {
+    this->code.push_back("JUMP " + std::to_string(offset));
+    this->pc++;
+}
+
+void Code::JPOS() {
+    this->code.push_back("JPOS ");
+    this->pc++;
+}
+
+void Code::JPOS(long long offset) {
+    this->code.push_back("JPOS " + std::to_string(offset));
+    this->pc++;
+}
+
+void Code::JNEG() {
+    this->code.push_back("JNEG ");
+    this->pc++;
+}
+
+void Code::JNEG(long long offset) {
+    this->code.push_back("JNEG " + std::to_string(offset));
+    this->pc++;
+}
+
+void Code::JZERO() {
+    this->code.push_back("JZERO ");
+    this->pc++;
+}
+
+void Code::JZERO(long long offset) {
+    this->code.push_back("JZERO " + std::to_string(offset));
+    this->pc++;
 }

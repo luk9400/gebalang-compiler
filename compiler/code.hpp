@@ -65,12 +65,24 @@ class Code {
         void check_init(symbol* sym);
 
         // ASSEMBLER COMMANDS
+        void HALT();
+        void GET();
+        void PUT();
         void ADD(long long offset);
         void SUB(long long offset);
         void SHIFT(long long offset);
         void INC();
         void DEC();
         void STORE(long long offset);
+        void LOAD(long long offset);
         void store(symbol* sym);
         void load(symbol* sym);
+        void JUMP();
+        void JUMP(long long offset);
+        void JPOS();
+        void JPOS(long long offset);
+        void JNEG();
+        void JNEG(long long offset);
+        void JZERO();
+        void JZERO(long long offset);
 };

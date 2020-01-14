@@ -79,7 +79,7 @@ command:        identifier ASSIGN expression';'                             { co
 expression:     value                                                       { code->load_value($1); }
               | value PLUS value                                            { code->plus($1, $3);   }
               | value MINUS value                                           { code->minus($1, $3);  }
-              | value TIMES value                                           {}
+              | value TIMES value                                           { code->times($1, $3);  }
               | value DIV value                                             {}
               | value MOD value                                             {}
 ;              
