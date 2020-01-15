@@ -70,19 +70,27 @@ for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbo
     this->check_init(start);
     this->check_init(end);
 
+    // creating temporary variable for end and coping it
+    std::string end_name = "END" + std::to_string(this->data->memory_offset);
+    this->data->put_symbol(end_name, true);
+    symbol* end_tmp = this->data->get_symbol(end_name);
+
+    this->load(end);
+    this->STORE(end_tmp->offset);
+
     // initializing iterator
     this->load(start);
     this->STORE(iterator->offset);
 
-    cond_label* label = new cond_label(this->pc, 0);
-    this->SUB(end->offset);
+    cond_label* label = new cond_label(this->pc + 1, 0);
+    this->SUB(end_tmp->offset);
     if (to) {
         this->JPOS();
     } else {
         this->JNEG();
     }
 
-    return new for_label(iterator, start, end, label);
+    return new for_label(iterator, start, end_tmp, label);
 }
 
 void Code::for_second_block(for_label* label, bool to) {
@@ -95,7 +103,7 @@ void Code::for_second_block(for_label* label, bool to) {
     this->STORE(label->iterator->offset);
     this->JUMP(label->jump_label->start);
 
-    this->code[label->jump_label->start + 1] += std::to_string(this->pc);
+    this->code[label->jump_label->start] += std::to_string(this->pc);
 }
 
 void Code::write(symbol* sym) {
@@ -216,6 +224,14 @@ void Code::times(symbol* a, symbol* b) {
     this->STORE(C->offset);
 
     this->LOAD(C->offset);
+}
+
+void Code::div(symbol* a, symbol* b) {
+
+}
+
+void Code::mod(symbol* a, symbol* b) {
+    
 }
 
 // CONDITIONS

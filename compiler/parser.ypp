@@ -65,33 +65,33 @@ commands:       commands command
               | command
 ;              
 
-command:        identifier ASSIGN expression';'                             { code->assign($1);                     }
-              | IF condition THEN commands                                  { $1 = code->if_else_first_block($2);   }
-                ELSE commands ENDIF                                         { code->if_else_second_block($1);       }
-              | IF condition THEN commands ENDIF                            { code->if_block($2);                   }
-              | WHILE condition DO commands ENDWHILE                        { code->while_block($2);                }
-              | DO                                                          { $1 = code->do_while_first_block();    }
-                commands WHILE condition ENDDO                              { code->do_while_second_block($1, $5);  }
+command:        identifier ASSIGN expression';'                             { code->assign($1);                                 }
+              | IF condition THEN commands                                  { $1 = code->if_else_first_block($2);               }
+                ELSE commands ENDIF                                         { code->if_else_second_block($1);                   }
+              | IF condition THEN commands ENDIF                            { code->if_block($2);                               }
+              | WHILE condition DO commands ENDWHILE                        { code->while_block($2);                            }
+              | DO                                                          { $1 = code->do_while_first_block();                }
+                commands WHILE condition ENDDO                              { code->do_while_second_block($1, $5);              }
               | FOR pidentifier FROM value TO value DO                      { data->put_iterator(*$2);
-                                                                              $1 = code->for_first_block(*$2, $4, $6, true); }
+                                                                              $1 = code->for_first_block(*$2, $4, $6, true);    }
                 commands 
                 ENDFOR                                                      { code->for_second_block($1, true);
-                                                                              data->remove_iterator(*$2);           }
+                                                                              data->remove_iterator(*$2);                       }
               | FOR pidentifier FROM value DOWNTO value DO                  { data->put_iterator(*$2);
-                                                                              $1 = code->for_first_block(*$2, $4, $6, false); }
+                                                                              $1 = code->for_first_block(*$2, $4, $6, false);   }
                 commands 
                 ENDFOR                                                      { code->for_second_block($1, false);
-                                                                              data->remove_iterator(*$2);           }
-              | READ identifier';'                                          { code->read($2);                       }
-              | WRITE value';'                                              { code->write($2);                      }
+                                                                              data->remove_iterator(*$2);                       }
+              | READ identifier';'                                          { code->read($2);                                   }
+              | WRITE value';'                                              { code->write($2);                                  }
 ;              
 
 expression:     value                                                       { code->load_value($1); }
               | value PLUS value                                            { code->plus($1, $3);   }
               | value MINUS value                                           { code->minus($1, $3);  }
               | value TIMES value                                           { code->times($1, $3);  }
-              | value DIV value                                             {}
-              | value MOD value                                             {}
+              | value DIV value                                             { code->div($1, $3);    }
+              | value MOD value                                             { code->mod($1, $3);    }
 ;              
 
 condition:      value EQ value                                              { $$ = code->eq($1, $3);    }
