@@ -1,6 +1,10 @@
 DECLARE
-    i
+    a
 BEGIN
-    i ASSIGN 20 TIMES 2;
-    WRITE i;
+    FOR i FROM 5 DOWNTO 0 DO
+        WRITE i;
+    ENDFOR
+    FOR i FROM 5 DOWNTO 0 DO
+        WRITE i;
+    ENDFOR
 END

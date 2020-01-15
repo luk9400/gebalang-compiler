@@ -26,11 +26,13 @@ std::shared_ptr<Code> code = std::make_shared<Code>(data);
     long long num;
     symbol* sym;
     cond_label* label;
+    for_label* f_label;
 }
 
 %start program
 %token DECLARE TBEGIN END
-%token <label> IF WHILE DO FOR
+%token <label> IF WHILE DO 
+%token <f_label> FOR
 %token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
 %token READ WRITE
 %token LE GE LEQ GEQ EQ NEQ
@@ -70,8 +72,16 @@ command:        identifier ASSIGN expression';'                             { co
               | WHILE condition DO commands ENDWHILE                        { code->while_block($2);                }
               | DO                                                          { $1 = code->do_while_first_block();    }
                 commands WHILE condition ENDDO                              { code->do_while_second_block($1, $5);  }
-              | FOR pidentifier FROM value TO value DO commands ENDFOR      {}
-              | FOR pidentifier FROM value DOWNTO value DO commands ENDFOR  {}
+              | FOR pidentifier FROM value TO value DO                      { data->put_iterator(*$2);
+                                                                              $1 = code->for_first_block(*$2, $4, $6, true); }
+                commands 
+                ENDFOR                                                      { code->for_second_block($1, true);
+                                                                              data->remove_iterator(*$2);           }
+              | FOR pidentifier FROM value DOWNTO value DO                  { data->put_iterator(*$2);
+                                                                              $1 = code->for_first_block(*$2, $4, $6, false); }
+                commands 
+                ENDFOR                                                      { code->for_second_block($1, false);
+                                                                              data->remove_iterator(*$2);           }
               | READ identifier';'                                          { code->read($2);                       }
               | WRITE value';'                                              { code->write($2);                      }
 ;              

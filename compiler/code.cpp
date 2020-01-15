@@ -24,6 +24,9 @@ void Code::end_code() {
 // COMMANDS
 
 void Code::assign(symbol* var) {
+    if (var->is_iterator) {
+        throw std::string("Cannot assign value to iterator - " + var->name);
+    }
     this->store(var);
     var->is_init = true;
 }
@@ -59,6 +62,40 @@ void Code::do_while_second_block(cond_label* label, cond_label* cond) {
     this->JUMP(label->go_to);
 
     this->if_block(cond);
+}
+
+for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbol* end, bool to) {
+    symbol* iterator = this->data->get_symbol(iterator_name);
+
+    this->check_init(start);
+    this->check_init(end);
+
+    // initializing iterator
+    this->load(start);
+    this->STORE(iterator->offset);
+
+    cond_label* label = new cond_label(this->pc, 0);
+    this->SUB(end->offset);
+    if (to) {
+        this->JPOS();
+    } else {
+        this->JNEG();
+    }
+
+    return new for_label(iterator, start, end, label);
+}
+
+void Code::for_second_block(for_label* label, bool to) {
+    this->LOAD(label->iterator->offset);
+    if (to) {
+        this->INC();
+    } else {
+        this->DEC();
+    }
+    this->STORE(label->iterator->offset);
+    this->JUMP(label->jump_label->start);
+
+    this->code[label->jump_label->start + 1] += std::to_string(this->pc);
 }
 
 void Code::write(symbol* sym) {
@@ -177,7 +214,7 @@ void Code::times(symbol* a, symbol* b) {
     this->SUB(C->offset);
     this->SUB(C->offset);
     this->STORE(C->offset);
-    
+
     this->LOAD(C->offset);
 }
 
@@ -382,7 +419,7 @@ void Code::init_const(symbol* sym) {
 }
 
 void Code::check_init(symbol* sym) {
-    if (sym->is_array_cell || sym->is_addr_cell) {
+    if (sym->is_array_cell || sym->is_addr_cell || sym->is_iterator) {
         return;
     }
     if (!sym->is_init) {
