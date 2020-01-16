@@ -242,7 +242,7 @@ void Code::div(symbol* a, symbol* b) {
 
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 42); // Jump to end if b == 0 COUNT THIS!!!
+    this->JZERO(this->pc + 54); // Jump to end if b == 0 COUNT THIS!!!
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -260,12 +260,13 @@ void Code::div(symbol* a, symbol* b) {
 
     // remain = a, and a stays in p0
     this->load(a);
-    this->STORE(D->offset);
-    // flip a if its negative
-    this->JPOS(this->pc + 3);
-    this->SUB(D->offset);
-    this->SUB(D->offset);
     this->STORE(A->offset);
+    // flip a if its negative
+    this->JPOS(this->pc + 4);
+    this->SUB(A->offset);
+    this->SUB(A->offset);
+    this->STORE(A->offset);
+    this->STORE(D->offset);
 
     // while (scaled_divisor < a) {
     this->SUB(B->offset);    
@@ -307,8 +308,21 @@ void Code::div(symbol* a, symbol* b) {
     this->JZERO(this->pc + 2);
     this->JUMP(this->pc - 14);
 
-    // result
+    this->load(a);
+    this->JPOS(this->pc + 5);
+    this->LOAD(C->offset);
+    this->SUB(C->offset);
+    this->SUB(C->offset);
+    this->STORE(C->offset);
 
+    this->load(b);
+    this->JPOS(this->pc + 5);
+    this->LOAD(C->offset);
+    this->SUB(C->offset);
+    this->SUB(C->offset);
+    this->STORE(C->offset);
+
+    // result
     this->LOAD(C->offset);
 }
 

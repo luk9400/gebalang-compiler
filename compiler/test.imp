@@ -1,6 +1,8 @@
 DECLARE
-    a
+    a, c
 BEGIN
-    a ASSIGN 20 DIV -2;
+    a ASSIGN -20;
+    c ASSIGN -2;
+    a ASSIGN a DIV c;
     WRITE a;
 END
