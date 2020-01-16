@@ -1,8 +1,6 @@
 DECLARE
-    a, b, c
+    a
 BEGIN
-    READ a;
-    READ b;
-    c ASSIGN a TIMES b;
-    WRITE c;
+    a ASSIGN 6 DIV 4;
+    WRITE a;
 END

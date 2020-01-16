@@ -1,0 +1,10 @@
+../compiler/compiler 0-div-mod.imp 0-div-mod.mr
+../compiler/compiler 1-numbers.imp 1-numbers.mr
+../compiler/compiler 2-fib.imp 2-fib.mr
+../compiler/compiler 3-fib-factorial.imp 3-fib-factorial.mr
+../compiler/compiler 4-factorial.imp 4-factorial.mr
+../compiler/compiler 5-tab.imp 5-tab.mr
+../compiler/compiler 6-mod-mult.imp 6-mod-mult.mr
+../compiler/compiler 7-loopiii.imp 7-loopiii.mr
+../compiler/compiler 8-for.imp 8-for.mr
+../compiler/compiler 9-sort.imp 9-sort.mr

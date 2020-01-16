@@ -217,9 +217,8 @@ void Code::times(symbol* a, symbol* b) {
 
     // flip result if a was negative
     this->LOAD(D->offset);
-    this->JPOS(this->pc + 5);
-    this->LOAD(C->offset);
-    this->SUB(C->offset);
+    this->JPOS(this->pc + 4);
+    this->SUB(0);
     this->SUB(C->offset);
     this->STORE(C->offset);
 
@@ -240,9 +239,16 @@ void Code::div(symbol* a, symbol* b) {
     this->check_init(a);
     this->check_init(b);
 
+    if (b->is_const && b->value == 2) {
+        std::cout<<b->value<<std::endl;
+        this->load(a);
+        this->SHIFT(minus_one->offset);
+        return;
+    }
+
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 54); // Jump to end if b == 0 COUNT THIS!!!
+    this->JZERO(this->pc + 52); // Jump to end if b == 0 COUNT THIS!!!
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -309,16 +315,14 @@ void Code::div(symbol* a, symbol* b) {
     this->JUMP(this->pc - 14);
 
     this->load(a);
-    this->JPOS(this->pc + 5);
-    this->LOAD(C->offset);
-    this->SUB(C->offset);
+    this->JPOS(this->pc + 4);
+    this->SUB(0);
     this->SUB(C->offset);
     this->STORE(C->offset);
 
     this->load(b);
-    this->JPOS(this->pc + 5);
-    this->LOAD(C->offset);
-    this->SUB(C->offset);
+    this->JPOS(this->pc + 4);
+    this->SUB(0);
     this->SUB(C->offset);
     this->STORE(C->offset);
 
@@ -340,9 +344,22 @@ void Code::mod(symbol* a, symbol* b) {
     this->check_init(a);
     this->check_init(b);
 
+    // a MOD 2
+    if (b->is_const && b->value == 2) {
+        this->load(a);
+        this->STORE(A->offset);
+        this->SHIFT(minus_one->offset);
+        this->SHIFT(one->offset);
+        this->SUB(A->offset);
+        this->JZERO(this->pc + 3);
+        this->SUB(0);
+        this->INC();
+        return;
+    }
+
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 58); // Jump to end if b == 0 COUNT THIS!!!
+    this->JZERO(this->pc + 59); // Jump to end if b == 0 COUNT THIS!!!
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -407,16 +424,20 @@ void Code::mod(symbol* a, symbol* b) {
     // while (multiple != 0);
     this->JZERO(this->pc + 2);
     this->JUMP(this->pc - 14);
-////////////////////////////////////////////////////////////////
+
     // modulo fiku miku
+    // if a mod b = 0 return 0
+    this->LOAD(D->offset);
+    this->JZERO(this->pc + 15);
+
+    // testing signs
     this->load(a);
     this->JPOS(this->pc + 9);
     // a is negative
     this->load(b);
-    this->JPOS(this->pc + 5);
+    this->JPOS(this->pc + 4);
     // a < 0 && b < 0  -> a mod b = - (a % b)
-    this->LOAD(D->offset);
-    this->SUB(D->offset);
+    this->SUB(0);
     this->SUB(D->offset);
     this->JUMP(this->pc + 8); // to end
     // a < 0 && b > 0  -> a mod b = b - (a % b)
