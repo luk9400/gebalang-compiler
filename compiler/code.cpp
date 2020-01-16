@@ -264,7 +264,6 @@ void Code::div(symbol* a, symbol* b) {
     this->check_init(b);
 
     if (b->is_const && b->value == 2) {
-        std::cout<<b->value<<std::endl;
         this->load(a);
         this->SHIFT(minus_one->offset);
         return;
@@ -572,7 +571,11 @@ symbol* Code::get_num(long long num) {
 symbol* Code::pidentifier(std::string name) {
     symbol* sym = this->data->get_symbol(name);
     if (sym != nullptr) {
-        return sym;
+        if (!sym->is_array) {
+            return sym;
+        } else {
+            throw std::string(name + " - wrong usage, " + name + " is an array");
+        }
     } else {
         throw std::string(name + " - symbol does not exist");
     }
@@ -581,17 +584,21 @@ symbol* Code::pidentifier(std::string name) {
 symbol* Code::array_num_pidentifier(std::string name, long long num) {
     symbol* sym = this->data->get_symbol(name);
     if (sym != nullptr) {
-        if (sym->array_start <= num && sym->array_end >= num) {
-            long long offset = num - sym->array_start + sym->offset;
+        if (sym->is_array) {
+            if (sym->array_start <= num && sym->array_end >= num) {
+                long long offset = num - sym->array_start + sym->offset;
 
-            if (!this->data->check_context(name + std::to_string(num))) {
-                this->data->put_array_cell(name + std::to_string(num), offset);
+                if (!this->data->check_context(name + std::to_string(num))) {
+                    this->data->put_array_cell(name + std::to_string(num), offset);
+                }
+
+                symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
+                return ret_sym;
+            } else {
+                throw std::string(name + " - index out of boundry");
             }
-
-            symbol* ret_sym = this->data->get_symbol(name + std::to_string(num));
-            return ret_sym;
         } else {
-            throw std::string(name + " - index out of boundry");
+            throw std::string(name + " - is not an array");
         }
     } else {
         throw std::string(name + " - array does not exist");
@@ -603,24 +610,34 @@ symbol* Code::array_pid_pidentifier(std::string name, std::string pid_name) {
     symbol* var = this->data->get_symbol(pid_name);
 
     if (array != nullptr && var != nullptr) {
-        // init constants
-        symbol* array_start = this->get_num(array->array_start);
-        this->check_init(array_start);
-        symbol* array_offset = this->get_num(array->offset);
-        this->check_init(array_offset);
+        if (array->is_array) {
+            // init constants
+            symbol* array_start = this->get_num(array->array_start);
+            this->check_init(array_start);
+            symbol* array_offset = this->get_num(array->offset);
+            this->check_init(array_offset);
 
-        // calculate address of a cell
-        this->LOAD(var->offset);
-        this->SUB(array_start->offset);
-        this->ADD(array_offset->offset);
+            // calculate address of a cell
+            this->LOAD(var->offset);
+            this->SUB(array_start->offset);
+            this->ADD(array_offset->offset);
 
-        // save address
-        this->data->put_addr_cell("TMP" + std::to_string(this->data->memory_offset), this->data->memory_offset);
-        symbol* cell_address = this->data->get_symbol("TMP" + std::to_string(this->data->memory_offset));
-        this->STORE(cell_address->offset);
-        this->data->memory_offset++;
+            // save address
+            this->data->put_addr_cell("TMP" + std::to_string(this->data->memory_offset), this->data->memory_offset);
+            symbol* cell_address = this->data->get_symbol("TMP" + std::to_string(this->data->memory_offset));
+            this->STORE(cell_address->offset);
+            this->data->memory_offset++;
 
-        return cell_address;
+            return cell_address;
+        } else {
+            throw std::string(array->name + " - is not an array");
+        }
+    } else {
+        if (array == nullptr) {
+            throw std::string(name + " - array does not exsit");
+        } else {
+            throw std::string(pid_name + " - is not declared");
+        }
     }
 }
 
@@ -630,25 +647,46 @@ void Code::generate_constant(long long value, long long offset) {
     long long digits[64];
     bool nonnegative = (value >= 0);
 
-    symbol* regOne = this->data->get_symbol("1");
-    if (!regOne->is_init) {
+    symbol* one = this->data->get_symbol("1");
+    if (!one->is_init) {
         this->SUB(0);
         this->INC();
-        this->store(regOne);
-        regOne->is_init = true;
+        this->STORE(one->offset);
+        one->is_init = true;
     }
 
     this->SUB(0);
 
-    long long i = 0;
-    while (value != 0) {
-        digits[i] = llabs(value % 2);
-        value /= 2;
-        i++;
-    }
-    i--;
+    if (llabs(value) < 10) {
+        if (value > 0) {
+            for (long long i = 0; i < value; i++) {
+                this->INC();
+            }
+        } else {
+            for (long long i = 0; i < -value; i++) {
+               this->DEC();
+            }
+        }
+    } else {
+        long long i = 0;
+        while (value != 0) {
+            digits[i] = llabs(value % 2);
+            value /= 2;
+            i++;
+        }
+        i--;
 
-    for (; i > 0; i--) {
+        for (; i > 0; i--) {
+            if (digits[i] == 1) {
+                if (nonnegative) {
+                    this->INC();
+                } else {
+                    this->DEC();
+                }
+            }
+            this->SHIFT(one->offset);
+        }
+
         if (digits[i] == 1) {
             if (nonnegative) {
                 this->INC();
@@ -656,34 +694,9 @@ void Code::generate_constant(long long value, long long offset) {
                 this->DEC();
             }
         }
-        this->SHIFT(regOne->offset);
-    }
-
-    if (digits[i] == 1) {
-        if (nonnegative) {
-            this->INC();
-        } else {
-            this->DEC();
-        }
     }
 
     this->STORE(offset);
-
-    // if (value > 0) {
-    //     for (long long i = 0; i < value; i++) {
-    //         this->code.push_back("INC");
-    //         this->pc++;
-    //     }
-    // }
-    // if (value < 0) {
-    //     for (long long i = 0; i < -value; i++) {
-    //         this->code.push_back("DEC");
-    //         this->pc++;
-    //     }
-    // }
-
-    // this->code.push_back("STORE " + std::to_string(offset));
-    // this->pc += 2;
 }
 
 void Code::init_const(symbol* sym) {
