@@ -1,8 +1,8 @@
 DECLARE
-    e
+    a, b, c
 BEGIN
-    e ASSIGN 6;
-    FOR i FROM 1 TO 6 DO
-        WRITE i;
-    ENDFOR
+    READ a;
+    READ b;
+    c ASSIGN a TIMES b;
+    WRITE c;
 END
