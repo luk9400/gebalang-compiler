@@ -14,6 +14,7 @@ Data::Data() {
     this->put_symbol("B", false);
     this->put_symbol("C", false);
     this->put_symbol("D", false);
+    this->put_symbol("E", false);
 }
 
 bool Data::check_context(std::string name) {

@@ -227,11 +227,93 @@ void Code::times(symbol* a, symbol* b) {
 }
 
 void Code::div(symbol* a, symbol* b) {
+    symbol* A = this->data->get_symbol("A"); // dividend
+    symbol* B = this->data->get_symbol("B"); // scaled_divisor
+    symbol* C = this->data->get_symbol("C"); // result
+    symbol* D = this->data->get_symbol("D"); // remain
+    symbol* E = this->data->get_symbol("E"); // multiple
+    symbol* one = this->data->get_symbol("1");
+    symbol* minus_one = this->data->get_symbol("-1");
 
+    this->check_init(one);
+    this->check_init(minus_one);
+    this->check_init(a);
+    this->check_init(b);
+
+    // check if b != 0
+    this->load(b);
+    this->JZERO(this->pc + 42); // Jump to end if b == 0 COUNT THIS!!!
+    // scaled_divisor = b
+    this->STORE(B->offset);
+    // flip b if its negative
+    this->JPOS(this->pc + 4);
+    this->SUB(B->offset);
+    this->SUB(B->offset);
+    this->STORE(B->offset);
+    
+    // result = 0
+    this->SUB(0);
+    this->STORE(C->offset);
+    // multiple = 1 
+    this->INC();
+    this->STORE(E->offset);
+
+    // remain = a, and a stays in p0
+    this->load(a);
+    this->STORE(D->offset);
+    // flip a if its negative
+    this->JPOS(this->pc + 3);
+    this->SUB(D->offset);
+    this->SUB(D->offset);
+    this->STORE(A->offset);
+
+    // while (scaled_divisor < a) {
+    this->SUB(B->offset);    
+    this->JPOS(this->pc + 2);  //COUNT THIS
+    this->JUMP(this->pc + 9);
+    // scaled_divisor << 1
+    this->LOAD(B->offset);
+    this->SHIFT(one->offset);
+    this->STORE(B->offset);
+    // multiple << 1
+    this->LOAD(E->offset);
+    this->SHIFT(one->offset);
+    this->STORE(E->offset);
+    this->LOAD(A->offset);
+    this->JUMP(this->pc - 10); //COUNT THIS
+    // }
+
+    // do {
+    // if(remain >= scaled_divisor) {
+    this->LOAD(D->offset);
+    this->SUB(B->offset);
+    this->JNEG(this->pc + 5); //COUNT THIS
+    // remain -= scaled_divisor
+    this->STORE(D->offset);
+    // result += multiple
+    this->LOAD(C->offset);
+    this->ADD(E->offset);
+    this->STORE(C->offset);
+    // }
+    // scaled_divisor >> 1
+    this->LOAD(B->offset);
+    this->SHIFT(minus_one->offset);
+    this->STORE(B->offset);
+    // multiple >> 1
+    this->LOAD(E->offset);
+    this->SHIFT(minus_one->offset);
+    this->STORE(E->offset);
+    // while (multiple != 0);
+    this->JZERO(this->pc + 2);
+    this->JUMP(this->pc - 14);
+
+    // result
+
+    this->LOAD(C->offset);
 }
 
 void Code::mod(symbol* a, symbol* b) {
-    
+
 }
 
 // CONDITIONS

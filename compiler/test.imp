@@ -1,10 +1,6 @@
 DECLARE
     a
 BEGIN
-    FOR i FROM 5 DOWNTO 0 DO
-        WRITE i;
-    ENDFOR
-    FOR i FROM 5 DOWNTO 0 DO
-        WRITE i;
-    ENDFOR
+    a ASSIGN 20 DIV -2;
+    WRITE a;
 END
