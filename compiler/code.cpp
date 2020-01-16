@@ -101,7 +101,7 @@ void Code::for_second_block(for_label* label, bool to) {
         this->DEC();
     }
     this->STORE(label->iterator->offset);
-    this->JUMP(label->jump_label->start);
+    this->JUMP(label->jump_label->start - 1);
 
     this->code[label->jump_label->start] += std::to_string(this->pc);
 }

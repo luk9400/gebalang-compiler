@@ -1,12 +1,8 @@
 DECLARE
     e
 BEGIN
-    e ASSIGN 6 MOD 4;
-    WRITE e;
-    e ASSIGN 6 MOD -4;
-    WRITE e;
-    e ASSIGN -6 MOD 4;
-    WRITE e;
-    e ASSIGN -6 MOD 0;
-    WRITE e;
+    e ASSIGN 6;
+    FOR i FROM 1 TO 6 DO
+        WRITE i;
+    ENDFOR
 END
