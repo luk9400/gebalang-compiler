@@ -139,7 +139,7 @@ void Code::plus(symbol* a, symbol* b) {
         return;
     }
 
-    if (b->is_const && b->value < 10 && b->value > -10) {
+    if (b->is_const && llabs(b->value) < 10) {
         this->load(a);
         for (int i = 0; i < llabs(b->value); i++) {
             if (b->value > 0) {
@@ -171,6 +171,18 @@ void Code::minus(symbol* a, symbol* b) {
 
     if (a == b) {
         this->SUB(0);
+        return;
+    }
+
+    if (b->is_const && llabs(b->value) < 10) {
+        this->load(a);
+        for (int i = 0; i < llabs(b->value); i++) {
+            if (b->value < 0) {
+                this->INC();
+            } else {
+                this->DEC();
+            }
+        }
         return;
     }
 
@@ -211,19 +223,19 @@ void Code::times(symbol* a, symbol* b) {
     this->STORE(D->offset);
 
     // flip a if its negative
-    this->JPOS(this->pc + 4);  //hmmm
+    this->JPOS(this->pc + 4);
     this->SUB(A->offset);
     this->SUB(A->offset);
     this->STORE(A->offset);
 
     // while (a != 0) {
-    this->JZERO(this->pc + 15);  // COUNT THIS!!!
+    this->JZERO(this->pc + 15);
     // if (a & 1) {
     this->SHIFT(minus_one->offset);
     this->SHIFT(one->offset);
     this->SUB(A->offset);
 
-    this->JZERO(this->pc + 4);  //hmmm
+    this->JZERO(this->pc + 4);
     this->LOAD(C->offset);
     this->ADD(B->offset);
     this->STORE(C->offset);
@@ -237,7 +249,7 @@ void Code::times(symbol* a, symbol* b) {
     this->LOAD(A->offset);
     this->SHIFT(minus_one->offset);
     this->STORE(A->offset);
-    this->JUMP(this->pc - 14);  //hmmm
+    this->JUMP(this->pc - 14);
     // }
 
     // flip result if a was negative
@@ -280,7 +292,7 @@ void Code::div(symbol* a, symbol* b) {
 
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 52); // Jump to end if b == 0 COUNT THIS!!!
+    this->JZERO(this->pc + 52); // Jump to end if b == 0
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -308,7 +320,7 @@ void Code::div(symbol* a, symbol* b) {
 
     // while (scaled_divisor < a) {
     this->SUB(B->offset);    
-    this->JPOS(this->pc + 2);  //COUNT THIS
+    this->JPOS(this->pc + 2);  
     this->JUMP(this->pc + 9);
     // scaled_divisor << 1
     this->LOAD(B->offset);
@@ -319,14 +331,14 @@ void Code::div(symbol* a, symbol* b) {
     this->SHIFT(one->offset);
     this->STORE(E->offset);
     this->LOAD(A->offset);
-    this->JUMP(this->pc - 10); //COUNT THIS
+    this->JUMP(this->pc - 10); 
     // }
 
     // do {
     // if(remain >= scaled_divisor) {
     this->LOAD(D->offset);
     this->SUB(B->offset);
-    this->JNEG(this->pc + 5); //COUNT THIS
+    this->JNEG(this->pc + 5); 
     // remain -= scaled_divisor
     this->STORE(D->offset);
     // result += multiple
@@ -396,7 +408,7 @@ void Code::mod(symbol* a, symbol* b) {
 
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 59); // Jump to end if b == 0 COUNT THIS!!!
+    this->JZERO(this->pc + 59); // Jump to end if b == 0
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -424,7 +436,7 @@ void Code::mod(symbol* a, symbol* b) {
 
     // while (scaled_divisor < a) {
     this->SUB(B->offset);    
-    this->JPOS(this->pc + 2);  //COUNT THIS
+    this->JPOS(this->pc + 2);
     this->JUMP(this->pc + 9);
     // scaled_divisor << 1
     this->LOAD(B->offset);
@@ -435,14 +447,14 @@ void Code::mod(symbol* a, symbol* b) {
     this->SHIFT(one->offset);
     this->STORE(E->offset);
     this->LOAD(A->offset);
-    this->JUMP(this->pc - 10); //COUNT THIS
+    this->JUMP(this->pc - 10);
     // }
 
     // do {
     // if(remain >= scaled_divisor) {
     this->LOAD(D->offset);
     this->SUB(B->offset);
-    this->JNEG(this->pc + 5); //COUNT THIS
+    this->JNEG(this->pc + 5);
     // remain -= scaled_divisor
     this->STORE(D->offset);
     // result += multiple
@@ -463,6 +475,7 @@ void Code::mod(symbol* a, symbol* b) {
     this->JUMP(this->pc - 14);
 
     // modulo fiku miku
+    
     // if a mod b = 0 return 0
     this->LOAD(D->offset);
     this->JZERO(this->pc + 15);

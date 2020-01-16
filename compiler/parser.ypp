@@ -147,11 +147,11 @@ int main(int argc, char** argv) {
     try {
         yyparse();
         return_code(code->get_code(), argv[2]);
+        std::cout << "### Compiled successfully ###" << std::endl;
     } catch (std::string e) {
         yyerror(e);
     }
-
-    data->print_symbols();
+    //data->print_symbols();
 
     return 0;
 }
