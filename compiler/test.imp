@@ -1,8 +1,12 @@
 DECLARE
-    a, c
+    e
 BEGIN
-    a ASSIGN -20;
-    c ASSIGN -2;
-    a ASSIGN a DIV c;
-    WRITE a;
+    e ASSIGN 6 MOD 4;
+    WRITE e;
+    e ASSIGN 6 MOD -4;
+    WRITE e;
+    e ASSIGN -6 MOD 4;
+    WRITE e;
+    e ASSIGN -6 MOD 0;
+    WRITE e;
 END
