@@ -8,3 +8,6 @@
 ../compiler/compiler 7-loopiii.imp 7-loopiii.mr
 ../compiler/compiler 8-for.imp 8-for.mr
 ../compiler/compiler 9-sort.imp 9-sort.mr
+../compiler/compiler program0.imp program0.mr
+../compiler/compiler program1.imp program1.mr
+../compiler/compiler program2.imp program2.mr

@@ -1,6 +1,7 @@
 DECLARE
     a
 BEGIN
-    a ASSIGN 6 DIV 4;
+    a ASSIGN 1;
+    a ASSIGN a PLUS -15;
     WRITE a;
 END

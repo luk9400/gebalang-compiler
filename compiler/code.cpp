@@ -128,8 +128,28 @@ void Code::load_value(symbol* sym) {
 }
 
 void Code::plus(symbol* a, symbol* b) {
+    symbol* one = this->data->get_symbol("1");
     this->check_init(a);
     this->check_init(b);
+    this->check_init(one);
+
+    if (a == b) {
+        this->load(a);
+        this->SHIFT(one->offset);
+        return;
+    }
+
+    if (b->is_const && b->value < 10 && b->value > -10) {
+        this->load(a);
+        for (int i = 0; i < llabs(b->value); i++) {
+            if (b->value > 0) {
+                this->INC();
+            } else {
+                this->DEC();
+            }
+        }
+        return;
+    }
 
     if (a->is_addr_cell && b->is_addr_cell) {
         this->load(a);
@@ -148,6 +168,11 @@ void Code::plus(symbol* a, symbol* b) {
 void Code::minus(symbol* a, symbol* b) {
     this->check_init(a);
     this->check_init(b);
+
+    if (a == b) {
+        this->SUB(0);
+        return;
+    }
 
     if (b->is_addr_cell) {
         this->load(b);
@@ -234,7 +259,6 @@ void Code::div(symbol* a, symbol* b) {
     symbol* one = this->data->get_symbol("1");
     symbol* minus_one = this->data->get_symbol("-1");
 
-    this->check_init(one);
     this->check_init(minus_one);
     this->check_init(a);
     this->check_init(b);
@@ -243,6 +267,15 @@ void Code::div(symbol* a, symbol* b) {
         std::cout<<b->value<<std::endl;
         this->load(a);
         this->SHIFT(minus_one->offset);
+        return;
+    }
+
+    this->check_init(one);
+
+    if (a == b) {
+        this->load(a);
+        this->JZERO(this->pc + 3);
+        this->LOAD(one->offset);
         return;
     }
 
@@ -354,6 +387,11 @@ void Code::mod(symbol* a, symbol* b) {
         this->JZERO(this->pc + 3);
         this->SUB(0);
         this->INC();
+        return;
+    }
+
+    if (a == b) {
+        this->SUB(0);
         return;
     }
 
