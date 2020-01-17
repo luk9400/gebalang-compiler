@@ -292,7 +292,7 @@ void Code::div(symbol* a, symbol* b) {
 
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 52); // Jump to end if b == 0
+    this->JZERO(this->pc + 60); // Jump to end if b == 0
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -372,6 +372,12 @@ void Code::div(symbol* a, symbol* b) {
 
     // result
     this->LOAD(C->offset);
+    this->JNEG(this->pc + 2);
+    this->JUMP(this->pc + 5);
+    this->LOAD(D->offset);
+    this->JZERO(this->pc + 3);
+    this->LOAD(C->offset);
+    this->DEC(); 
 }
 
 void Code::mod(symbol* a, symbol* b) {
@@ -482,7 +488,7 @@ void Code::mod(symbol* a, symbol* b) {
 
     // testing signs
     this->load(a);
-    this->JPOS(this->pc + 9);
+    this->JPOS(this->pc + 8);
     // a is negative
     this->load(b);
     this->JPOS(this->pc + 4);
@@ -666,6 +672,7 @@ void Code::generate_constant(long long value, long long offset) {
         this->INC();
         this->STORE(one->offset);
         one->is_init = true;
+        one->value = 1;
     }
 
     this->SUB(0);

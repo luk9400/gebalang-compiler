@@ -1,7 +1,6 @@
 DECLARE
     a
 BEGIN
-    a ASSIGN 1;
-    a ASSIGN a MINUS 10;
+    a ASSIGN 5 MINUS 1;
     WRITE a;
 END

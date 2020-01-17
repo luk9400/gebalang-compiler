@@ -25,7 +25,7 @@ void run_machine( std::vector< std::pair<int,long long> > & program )
 
   long long t;
 
-  std::cout << "Uruchamianie programu." << std::endl;
+  // std::cout << "Uruchamianie programu." << std::endl;
   lr = 0;
   srand( time(NULL) );
   pam[0] = rand();
@@ -34,8 +34,8 @@ void run_machine( std::vector< std::pair<int,long long> > & program )
   {
     switch( program[lr].first )
     {
-      case GET:		std::cout << "? "; std::cin >> pam[0]; t+=100; lr++; break;
-      case PUT:		std::cout << "> " << pam[0] << std::endl; t+=100; lr++; break;
+      case GET:		std::cin >> pam[0]; t+=100; lr++; break;
+      case PUT:		std::cout << pam[0] << std::endl; t+=100; lr++; break;
 
       case LOAD:	pam[0] = pam[program[lr].second]; t+=10; lr++; break;
       case STORE:	pam[program[lr].second] = pam[0]; t+=10; lr++; break;
@@ -65,5 +65,5 @@ void run_machine( std::vector< std::pair<int,long long> > & program )
       exit(-1);
     }
   }
-  std::cout << "Skończono program (koszt: " << t << ")." << std::endl;
+  std::cout << t << std::endl;
 }

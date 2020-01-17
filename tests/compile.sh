@@ -1,4 +1,5 @@
 ../compiler/compiler 0-div-mod.imp 0-div-mod.mr
+../compiler/compiler 00-div-mod.imp 00-div-mod.mr
 ../compiler/compiler 1-numbers.imp 1-numbers.mr
 ../compiler/compiler 2-fib.imp 2-fib.mr
 ../compiler/compiler 3-fib-factorial.imp 3-fib-factorial.mr
