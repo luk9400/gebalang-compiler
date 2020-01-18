@@ -70,6 +70,25 @@ for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbo
     this->check_init(start);
     this->check_init(end);
 
+    // unroll if known range is smaller than 10
+    if (start->is_const && end->is_const) {
+        if (to) {
+            if (end->value - start->value < 10 && end->value - start->value >= 0) {
+                this->LOAD(start->offset);
+                this->STORE(iterator->offset);
+                cond_label* label = new cond_label(this->pc, 0);
+                return new for_label(iterator, start, end, label, true);
+            }
+        } else {
+            if (start->value - end->value < 10 && start->value - end->value >= 0) {
+                this->LOAD(start->offset);
+                this->STORE(iterator->offset);
+                cond_label* label = new cond_label(this->pc, 0);
+                return new for_label(iterator, start, end, label, true);
+            }
+        }
+    }
+
     // creating temporary variable for end and coping it
     std::string end_name = "END" + std::to_string(this->data->memory_offset);
     this->data->put_symbol(end_name, true);
@@ -90,20 +109,40 @@ for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbo
         this->JNEG();
     }
 
-    return new for_label(iterator, start, end_tmp, label);
+    return new for_label(iterator, start, end_tmp, label, false);
 }
 
 void Code::for_second_block(for_label* label, bool to) {
-    this->LOAD(label->iterator->offset);
-    if (to) {
-        this->INC();
-    } else {
-        this->DEC();
-    }
-    this->STORE(label->iterator->offset);
-    this->JUMP(label->jump_label->start - 1);
+    if (label->unroll) {
+        this->LOAD(label->iterator->offset);
+        if (to) {
+            this->INC();
+        } else {
+            this->DEC();
+        }
+        this->STORE(label->iterator->offset);
 
-    this->code[label->jump_label->start] += std::to_string(this->pc);
+        long long range = llabs(label->end->value - label->start->value) + 1;
+        long long end = this->pc - 1;
+        std::vector<std::string>::iterator it;
+        for (int i = 0; i < range; i++) {
+            for (it = this->code.begin() + label->jump_label->start; it != this->code.begin() + end; it++) {
+                std::cout << *it << std::endl; 
+                this->code.push_back(*it);
+            }
+        }
+    } else {
+        this->LOAD(label->iterator->offset);
+        if (to) {
+            this->INC();
+        } else {
+            this->DEC();
+        }
+        this->STORE(label->iterator->offset);
+        this->JUMP(label->jump_label->start - 1);
+
+        this->code[label->jump_label->start] += std::to_string(this->pc);
+    }
 }
 
 void Code::write(symbol* sym) {

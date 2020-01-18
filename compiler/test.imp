@@ -1,6 +1,5 @@
-DECLARE
-    a
 BEGIN
-    a ASSIGN 5 MINUS 1;
-    WRITE a;
+    FOR i FROM 1 TO 5 DO
+        WRITE 1;
+    ENDFOR
 END
