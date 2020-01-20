@@ -123,11 +123,17 @@ void Code::for_second_block(for_label* label, bool to) {
         this->STORE(label->iterator->offset);
 
         long long range = llabs(label->end->value - label->start->value) + 1;
-        long long end = this->pc - 1;
+        long long end = this->pc;
+        
+        std::cout << range << std::endl;
         std::vector<std::string>::iterator it;
+        std::vector<std::string>::iterator it_start = this->code.begin() + label->jump_label->start;
+        std::vector<std::string>::iterator it_end = this->code.begin() + end;
+
         for (int i = 0; i < range; i++) {
-            for (it = this->code.begin() + label->jump_label->start; it != this->code.begin() + end; it++) {
-                std::cout << *it << std::endl; 
+            std::cout << i << std::endl;
+            for (it = it_start; it != it_end; it++) {
+                std::cout << *it << std::endl;
                 this->code.push_back(*it);
             }
         }
