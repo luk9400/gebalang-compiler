@@ -71,23 +71,23 @@ for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbo
     this->check_init(end);
 
     // unroll if known range is smaller than 10
-    if (start->is_const && end->is_const) {
-        if (to) {
-            if (end->value - start->value < 10 && end->value - start->value >= 0) {
-                this->LOAD(start->offset);
-                this->STORE(iterator->offset);
-                cond_label* label = new cond_label(this->pc, 0);
-                return new for_label(iterator, start, end, label, true);
-            }
-        } else {
-            if (start->value - end->value < 10 && start->value - end->value >= 0) {
-                this->LOAD(start->offset);
-                this->STORE(iterator->offset);
-                cond_label* label = new cond_label(this->pc, 0);
-                return new for_label(iterator, start, end, label, true);
-            }
-        }
-    }
+    // if (start->is_const && end->is_const) {
+    //     if (to) {
+    //         if (end->value - start->value < 10 && end->value - start->value >= 0) {
+    //             this->LOAD(start->offset);
+    //             this->STORE(iterator->offset);
+    //             cond_label* label = new cond_label(this->pc, 0);
+    //             return new for_label(iterator, start, end, label, true);
+    //         }
+    //     } else {
+    //         if (start->value - end->value < 10 && start->value - end->value >= 0) {
+    //             this->LOAD(start->offset);
+    //             this->STORE(iterator->offset);
+    //             cond_label* label = new cond_label(this->pc, 0);
+    //             return new for_label(iterator, start, end, label, true);
+    //         }
+    //     }
+    // }
 
     // creating temporary variable for end and coping it
     std::string end_name = "END" + std::to_string(this->data->memory_offset);
@@ -558,6 +558,9 @@ void Code::mod(symbol* a, symbol* b) {
 
 cond_label* Code::eq(symbol* a, symbol* b) {
     long long start = this->pc;
+    
+    if (b)
+
     this->minus(a, b);
     this->JZERO(this->pc + 2);
     this->JUMP();

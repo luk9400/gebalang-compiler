@@ -35,6 +35,7 @@
 compiler
 parser.tab.*
 lexer.c
+*.mr
 
 maszyna-wirtualna
 maszyna-wirtualna-cln

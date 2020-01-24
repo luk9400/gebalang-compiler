@@ -1,5 +1,8 @@
+DECLARE
+    i, j, k
 BEGIN
-    FOR i FROM 1 TO 5 DO
-        WRITE 1;
-    ENDFOR
+    READ i;
+    READ j;
+    k ASSIGN i TIMES j;
+    WRITE k;
 END
