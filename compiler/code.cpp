@@ -337,7 +337,7 @@ void Code::div(symbol* a, symbol* b) {
 
     // check if b != 0
     this->load(b);
-    this->JZERO(this->pc + 60); // Jump to end if b == 0
+    this->JZERO(this->pc + 62); // Jump to end if b == 0
     // scaled_divisor = b
     this->STORE(B->offset);
     // flip b if its negative
@@ -415,14 +415,16 @@ void Code::div(symbol* a, symbol* b) {
     this->SUB(C->offset);
     this->STORE(C->offset);
 
-    // result
+    // floor(result)
     this->LOAD(C->offset);
     this->JNEG(this->pc + 2);
-    this->JUMP(this->pc + 5);
+    this->JUMP(this->pc + 7);
     this->LOAD(D->offset);
-    this->JZERO(this->pc + 3);
+    this->JZERO(this->pc + 4);
     this->LOAD(C->offset);
-    this->DEC(); 
+    this->DEC();
+    this->JUMP(this->pc + 2);
+    this->LOAD(C->offset); 
 }
 
 void Code::mod(symbol* a, symbol* b) {

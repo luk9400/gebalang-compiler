@@ -3,6 +3,6 @@ DECLARE
 BEGIN
     READ i;
     READ j;
-    k ASSIGN i TIMES j;
+    k ASSIGN i DIV j;
     WRITE k;
 END
