@@ -306,7 +306,7 @@ void Code::times(symbol* a, symbol* b) {
     this->JPOS(this->pc + 4);
     this->SUB(0);
     this->SUB(C->offset);
-    this->STORE(C->offset);
+    this->JUMP(this->pc + 2);
 
     this->LOAD(C->offset);
 }
