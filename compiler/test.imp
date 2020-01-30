@@ -1,6 +1,6 @@
 DECLARE
     k
 BEGIN
-    k ASSIGN -5 TIMES -3;
+    [k ASSIGN -5 TIMES -3;]
     WRITE k;
 END

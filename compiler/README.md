@@ -22,7 +22,7 @@ Program należy skompilować przy pomocy polecenia `make`.
 
 Aby poprawnie uruchomić program należy użyć polecenia:
 
-`./compiler <nazwa_pliku_wejściowego.imp> <nazwa_pliku_wynikowego.mr>` 
+`./kompilator <nazwa_pliku_wejściowego.imp> <nazwa_pliku_wynikowego.mr>` 
 
 ## Opis załączonych plików
 - `code.cpp` i `code.hpp` - klasa generująca kod w asemblerze

@@ -4,7 +4,7 @@ FLAGS = -std=c++17 --pedantic -Wextra -Wall
 all: compiler
 
 compiler: parser.o lexer.o data.o code.o
-	g++ $(FLAGS) -o compiler parser.o lexer.o data.o code.o
+	g++ $(FLAGS) -o kompilator parser.o lexer.o data.o code.o
 
 code.o: code.cpp
 	g++ $(FLAGS) -o code.o -c code.cpp
@@ -28,4 +28,4 @@ clean:
 	rm -f *.o *.tab.cpp *.tab.hpp lexer.c
 
 cleanall: clean
-	rm -f compiler
+	rm -f kompilator

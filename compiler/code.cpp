@@ -786,7 +786,7 @@ void Code::check_init(symbol* sym) {
         if (sym->is_const) {
             this->init_const(sym);
         } else {
-            throw std::string(sym->name + " - symbol is not initialized");
+            std::cout << sym->name << " - symbol may be uninitialized" << std::endl;
         }
     }
 }

@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
         std::cout << "### Compiled successfully ###" << std::endl;
     } catch (std::string e) {
         yyerror(e);
+        exit(1);
     }
     //data->print_symbols();
 
