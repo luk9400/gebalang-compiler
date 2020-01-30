@@ -246,6 +246,7 @@ void Code::times(symbol* a, symbol* b) {
     symbol* A = this->data->get_symbol("A");
     symbol* B = this->data->get_symbol("B");
     symbol* C = this->data->get_symbol("C");
+    symbol* D = this->data->get_symbol("D");
     symbol* one = this->data->get_symbol("1");
     symbol* minus_one = this->data->get_symbol("-1");
 
@@ -259,17 +260,36 @@ void Code::times(symbol* a, symbol* b) {
         return;
     }
 
+    if (a->is_const && a->value == 2) {
+        this->load(b);
+        this->SHIFT(one->offset);
+        return;
+    }
+
     this->check_init(minus_one);
 
     // result = 0 in register C
     this->SUB(0);
     this->STORE(C->offset);
 
+    // set smaller numer as first one
+    this->minus(a, b);
+    this->JNEG(this->pc + 7);
+    this->load(a);
+    this->STORE(B->offset);
+    this->load(b);
+    this->STORE(A->offset);
+    // save sign bit
+    this->STORE(D->offset);
+    this->JUMP(this->pc + 6);
+
     // copy a and b, and leave a in p0
     this->load(b);
     this->STORE(B->offset);
     this->load(a);
     this->STORE(A->offset);
+    // save sign bit
+    this->STORE(D->offset);
 
     // flip a if its negative
     this->JPOS(this->pc + 4);
@@ -302,7 +322,7 @@ void Code::times(symbol* a, symbol* b) {
     // }
 
     // flip result if a was negative
-    this->load(a);
+    this->LOAD(D->offset);
     this->JPOS(this->pc + 4);
     this->SUB(0);
     this->SUB(C->offset);
