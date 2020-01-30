@@ -114,29 +114,29 @@ for_label* Code::for_first_block(std::string iterator_name, symbol* start, symbo
 
 void Code::for_second_block(for_label* label, bool to) {
     if (label->unroll) {
-        this->LOAD(label->iterator->offset);
-        if (to) {
-            this->INC();
-        } else {
-            this->DEC();
-        }
-        this->STORE(label->iterator->offset);
+        // this->LOAD(label->iterator->offset);
+        // if (to) {
+        //     this->INC();
+        // } else {
+        //     this->DEC();
+        // }
+        // this->STORE(label->iterator->offset);
 
-        long long range = llabs(label->end->value - label->start->value) + 1;
-        long long end = this->pc;
+        // long long range = llabs(label->end->value - label->start->value) + 1;
+        // long long end = this->pc;
         
-        std::cout << range << std::endl;
-        std::vector<std::string>::iterator it;
-        std::vector<std::string>::iterator it_start = this->code.begin() + label->jump_label->start;
-        std::vector<std::string>::iterator it_end = this->code.begin() + end;
+        // std::cout << range << std::endl;
+        // std::vector<std::string>::iterator it;
+        // std::vector<std::string>::iterator it_start = this->code.begin() + label->jump_label->start;
+        // std::vector<std::string>::iterator it_end = this->code.begin() + end;
 
-        for (int i = 0; i < range; i++) {
-            std::cout << i << std::endl;
-            for (it = it_start; it != it_end; it++) {
-                std::cout << *it << std::endl;
-                this->code.push_back(*it);
-            }
-        }
+        // for (int i = 0; i < range; i++) {
+        //     std::cout << i << std::endl;
+        //     for (it = it_start; it != it_end; it++) {
+        //         std::cout << *it << std::endl;
+        //         this->code.push_back(*it);
+        //     }
+        // }
     } else {
         this->LOAD(label->iterator->offset);
         if (to) {
@@ -246,14 +246,20 @@ void Code::times(symbol* a, symbol* b) {
     symbol* A = this->data->get_symbol("A");
     symbol* B = this->data->get_symbol("B");
     symbol* C = this->data->get_symbol("C");
-    symbol* D = this->data->get_symbol("D");
     symbol* one = this->data->get_symbol("1");
     symbol* minus_one = this->data->get_symbol("-1");
 
     this->check_init(one);
-    this->check_init(minus_one);
     this->check_init(a);
     this->check_init(b);
+
+    if (b->is_const && b->value == 2) {
+        this->load(a);
+        this->SHIFT(one->offset);
+        return;
+    }
+
+    this->check_init(minus_one);
 
     // result = 0 in register C
     this->SUB(0);
@@ -264,8 +270,6 @@ void Code::times(symbol* a, symbol* b) {
     this->STORE(B->offset);
     this->load(a);
     this->STORE(A->offset);
-    // copy original a to remember sign bit
-    this->STORE(D->offset);
 
     // flip a if its negative
     this->JPOS(this->pc + 4);
@@ -298,7 +302,7 @@ void Code::times(symbol* a, symbol* b) {
     // }
 
     // flip result if a was negative
-    this->LOAD(D->offset);
+    this->load(a);
     this->JPOS(this->pc + 4);
     this->SUB(0);
     this->SUB(C->offset);

@@ -1,8 +1,6 @@
 DECLARE
-    i, j, k
+    k
 BEGIN
-    READ i;
-    READ j;
-    k ASSIGN i DIV j;
+    k ASSIGN -5 TIMES -3;
     WRITE k;
 END
