@@ -39,4 +39,4 @@ Podczas testów okazało się, że kompilator dla testu `4-fib-factorial.imp` ge
 Jednak po zamianie linijki 15. z `s(i) ASSIGN s(j) TIMES m;` na `s(i) ASSIGN m TIMES s(j);` program nie zapętla się i zwraca wynik.
 Na maszynie cln zwraca poprawny wynik dla obu wersji testu dla dowolnego poprawnego argumentu.
 
-Gdy możliwe jest użycie niezainicjalizowanej zmiennej kompilator ostrzeże o tym i skompiluje program.
+Gdy możliwe jest użycie niezainicjalizowanej zmiennej kompilator ostrzeże o tym i skompiluje program. Powoduje to, że testy `error3` i `error5` się kompilują, lecz pokazują ostrzeżenie.
