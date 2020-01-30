@@ -38,3 +38,5 @@ Aby poprawnie uruchomić program należy użyć polecenia:
 Podczas testów okazało się, że kompilator dla testu `4-fib-factorial.imp` generuje program, który na standardowej maszynie wirtualnej zapętla się dla argumentów większych niż 64. 
 Jednak po zamianie linijki 15. z `s(i) ASSIGN s(j) TIMES m;` na `s(i) ASSIGN m TIMES s(j);` program nie zapętla się i zwraca wynik.
 Na maszynie cln zwraca poprawny wynik dla obu wersji testu dla dowolnego poprawnego argumentu.
+
+Gdy możliwe jest użycie niezainicjalizowanej zmiennej kompilator ostrzeże o tym i skompiluje program.
