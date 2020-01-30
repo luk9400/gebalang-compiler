@@ -114,7 +114,7 @@ identifier:     pidentifier                                                 { $$
 
 int yyerror(std::string str) {
     std::cerr << str << " at line " << yylineno << std::endl;
-    return 1;
+    exit(1);
 }
 
 void return_code(std::vector<std::string> code, std::string file) {
@@ -150,7 +150,6 @@ int main(int argc, char** argv) {
         std::cout << "### Compiled successfully ###" << std::endl;
     } catch (std::string e) {
         yyerror(e);
-        exit(1);
     }
     //data->print_symbols();
 
