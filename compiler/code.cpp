@@ -584,9 +584,6 @@ void Code::mod(symbol* a, symbol* b) {
 
 cond_label* Code::eq(symbol* a, symbol* b) {
     long long start = this->pc;
-    
-    if (b)
-
     this->minus(a, b);
     this->JZERO(this->pc + 2);
     this->JUMP();
