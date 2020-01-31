@@ -1,6 +1,8 @@
 DECLARE
-    k
+    i, j, k
 BEGIN
-    k ASSIGN 3 TIMES -3;
+    READ i;
+    READ j;
+    k ASSIGN i DIV j;
     WRITE k;
 END

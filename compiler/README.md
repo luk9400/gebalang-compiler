@@ -41,4 +41,4 @@ Na maszynie cln zwraca poprawny wynik dla obu wersji testu dla dowolnego poprawn
 
 Powyższe rozwiązano wprowadzając optymalizację polegającą na mnożeniu mniejszej liczby przez większą.
 
-Gdy możliwe jest użycie niezainicjalizowanej zmiennej kompilator ostrzeże o tym i skompiluje program. Powoduje to, że testy `error3` i `error5` się kompilują, lecz pokazują ostrzeżenie.
+Gdy możliwe jest użycie niezainicjalizowanej zmiennej kompilator ostrzeże o tym i skompiluje program. Powoduje to, że testy `error3` i `error5` się kompilują, lecz podczas kompilacji pokazują ostrzeżenie o możliwej niezainicjalizowanej zmiennej.
