@@ -176,9 +176,9 @@ void Code::plus(symbol* a, symbol* b) {
     symbol* one = this->data->get_symbol("1");
     this->check_init(a);
     this->check_init(b);
-    this->check_init(one);
 
     if (a == b) {
+        this->check_init(one);
         this->load(a);
         this->SHIFT(one->offset);
         return;
@@ -272,7 +272,7 @@ void Code::times(symbol* a, symbol* b) {
     this->SUB(0);
     this->STORE(C->offset);
 
-    // set smaller numer as first one
+    // set smaller number as first one
     this->minus(a, b);
     this->JNEG(this->pc + 7);
     this->load(a);
